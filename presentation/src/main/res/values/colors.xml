@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#191720</color>
+    <color name="colorOnPrimary">#C4C4C4</color>
+    <color name="colorOnPrimaryVer2">#464255</color>
+    <color name="colorPrimaryDark">#18161d</color>
+    <color name="colorAccent">#FFC75B</color>
+    <color name="colorAccentLight">#ffe7b3</color>
+    <color name="colorSurface">#2F2C39</color>
+    <color name="colorOnSurface">#FFFFFF</color>
+    <color name="colorPlayer">#25222D</color>
+    <color name="colorOnPlayer">#FFFFFF</color>
+    <color name="colorInActive">#C4C4C4</color>
+</resources>

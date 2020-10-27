@@ -1,0 +1,22 @@
+<resources>
+    <dimen name="bottom_navigation_height">50dp</dimen>
+    <dimen name="collapsed_player_height">50dp</dimen>
+
+    <dimen name="icon_repeat_height">20dp</dimen>
+    <dimen name="icon_rewind_height">24dp</dimen>
+    <dimen name="icon_pause_height">50dp</dimen>
+
+    <dimen name="space_quadruple">64dp</dimen>
+    <dimen name="space_triple">48dp</dimen>
+    <dimen name="space_double">32dp</dimen>
+    <dimen name="space">16dp</dimen>
+    <dimen name="space_half">8dp</dimen>
+    <dimen name="space_quarter">4dp</dimen>
+    <dimen name="space_mini">2dp</dimen>
+    <dimen name="space_micro">1dp</dimen>
+
+    <dimen name="search_bar_height">50dp</dimen>
+    <dimen name="icon_search_nothing_found">90dp</dimen>
+
+    <dimen name="album_img_size">120dp</dimen>
+</resources>

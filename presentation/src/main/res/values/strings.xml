@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">SimplePlayer</string>
+
+    <string name="tracks">tracks</string>
+    <string name="folders">Folders</string>
+    <string name="search">Search</string>
+    <string name="singers">Singers</string>
+    <string name="albums">Albums</string>
+
+    <string name="leave">Leave</string>
+
+    <!-- alert messages -->
+    <string name="no_required_permission">No required permission</string>
+
+    <!-- tags -->
+    <string name="tag_fragment_player">fragment_player</string>
+
+    <!-- search -->
+    <string name="search_nothing_found">Nothing Found</string>
+    <string name="title_activity_album">AlbumActivity</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

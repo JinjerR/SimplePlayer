@@ -1,0 +1,6 @@
+<resources>
+    <declare-styleable name="SearchNavigation">
+        <attr name="searchNavIconResId" format="integer" />
+        <attr name="searchNavTitle" format="string" />
+    </declare-styleable>
+</resources>

@@ -1,0 +1,10 @@
+<resources>
+    <item name="tracks" type="id"/>
+    <item name="folders" type="id"/>
+    <item name="search" type="id"/>
+    <item name="genres" type="id"/>
+
+    <item name="fragment_player" type="id"/>
+    <item name="fragment_tracks" type="id"/>
+    <item name="coordinator" type="id"/>
+</resources>
