@@ -45,7 +45,7 @@ abstract class SearchFragmentBase<P, VH: BaseViewHolder<P>>: BaseFragment(), IOn
 
         subscribeToViewModel()
 
-        viewModel.searchResult.observe(viewLifecycleOwner) { searchResult ->
+        searchViewModel.searchResult.observe(viewLifecycleOwner) { searchResult ->
             adapter.submitList(searchResult)
 
             listenerOnCountChanged?.onItemCountChanged(searchResult.size, searchType)
@@ -59,7 +59,7 @@ abstract class SearchFragmentBase<P, VH: BaseViewHolder<P>>: BaseFragment(), IOn
     }
 
     override fun onSearchQueryChanged(query: String) {
-        viewModel.search(query)
+        searchViewModel.search(query)
     }
 
     private fun initRecycler() {
@@ -81,17 +81,23 @@ abstract class SearchFragmentBase<P, VH: BaseViewHolder<P>>: BaseFragment(), IOn
         binding.txtNothingFound.visibility = View.INVISIBLE
     }
 
-    abstract val adapter: BaseAdapter<P, VH>
-
-    abstract val viewModel: SearchViewModelBase<P>
-
-    abstract val searchType: SearchType
-
     open fun getLayoutManager(): RecyclerView.LayoutManager {
         return LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
     }
 
     open fun getItemDecoration(): RecyclerView.ItemDecoration? = null
 
-    open fun subscribeToViewModel() { }
+    open fun subscribeToViewModel() {
+        mainViewModel.isTracksLoaded.observe(viewLifecycleOwner) { loaded ->
+            if (loaded) {
+                searchViewModel.onTracksLoaded()
+            }
+        }
+    }
+
+    abstract val adapter: BaseAdapter<P, VH>
+
+    abstract val searchViewModel: SearchViewModelBase<P>
+
+    abstract val searchType: SearchType
 }

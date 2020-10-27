@@ -11,7 +11,7 @@ class SearchSingersFragment: SearchFragmentBase<SearchSingerPresenter, SearchSin
 
     override val adapter = SearchSingerAdapter(::onItemClick)
 
-    override val viewModel: SearchSingersViewModel by fragmentViewModel()
+    override val searchViewModel: SearchSingersViewModel by fragmentViewModel()
 
     override val searchType: SearchType = SearchType.SINGERS
 

@@ -1,66 +1,63 @@
-package com.jinjer.simpleplayer.presentation.base
+package com.jinjer.simpleplayer.presentation.controller.main
 
 import android.Manifest
 import android.content.DialogInterface
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.jinjer.simpleplayer.presentation.R
-import com.jinjer.simpleplayer.presentation.controller.service.MusicService
+import com.jinjer.simpleplayer.presentation.base.BaseActivity
+import com.jinjer.simpleplayer.presentation.base.MainFragment
 import com.jinjer.simpleplayer.presentation.databinding.ActivityMainBinding
-import com.jinjer.simpleplayer.presentation.main.player.PlayerActivity
-import com.jinjer.simpleplayer.presentation.navigation.ViewPagerAdapterMain
 import com.jinjer.simpleplayer.presentation.utils.MessageUtils
-import com.jinjer.simpleplayer.presentation.utils.ShowLog
 import com.jinjer.simpleplayer.presentation.utils.extensions.activityViewModel
 import com.jinjer.simpleplayer.presentation.utils.notifications.INotifyManager
 import org.kodein.di.direct
 import org.kodein.di.instance
 
-class MainActivity: PlayerActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
-
-    override var idFragmentPlayer: Int = R.id.fragment_player
+class MainActivity: BaseActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private val mainViewModel: MainActivityViewModel by activityViewModel()
+    private val mainViewModel: MainViewModel by activityViewModel()
 
     private val requestCodeReadPermission = 1
     private val simpleName = MainActivity::class.java.simpleName
-    private var bottomMargin: Int = 0
     private var readPermissionGranted = false
+    private val tagMainFragment = "tag_main_fragment"
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
-        initBottomMargin()
-
-        binding.bottomNavigation.setOnNavigationItemSelectedListener(this)
-
         setupNotifications()
-        setupViewPager()
-
         checkPermission()
 
         if (readPermissionGranted) {
             mainViewModel.onPermissionGranted()
         }
 
-        super.onCreate(savedInstanceState)
+        addMainFragment()
     }
 
     override fun onStart() {
         super.onStart()
-        if (readPermissionGranted) {
-            mainViewModel.onAppResumes()
+        mainViewModel.onAppResumes()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mainViewModel.onAppStopped()
+    }
+
+    override fun onBackPressed() {
+        if (getMainFragment().backProcessed()) {
+            return
         }
+
+        super.onBackPressed()
     }
 
     override fun onRequestPermissionsResult(
@@ -87,51 +84,19 @@ class MainActivity: PlayerActivity(), BottomNavigationView.OnNavigationItemSelec
         }
     }
 
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        val selectedIndex =  when(item.itemId) {
-            R.id.tracks -> 0
-            R.id.folders -> 1
-            R.id.search -> 2
-
-            else -> 3
-        }
-
-        binding.viewPager.setCurrentItem(selectedIndex, false)
-
-        return true
+    private fun getMainFragment(): MainFragment {
+        return supportFragmentManager.findFragmentByTag(tagMainFragment) as MainFragment
     }
 
-    override fun onBackPressed() {
-        if (super.backProcessed()) {
-            return
-        }
-
-        super.onBackPressed()
-    }
-
-    override fun getBehaviorView(): View = binding.fragmentPlayer
-
-    override fun getBottomMargin(): Int = bottomMargin
-
-    private fun initBottomMargin() {
-        val bottomNavHeight = resources.getDimensionPixelSize(R.dimen.bottom_navigation_height)
-        val collapsedPlayerHeight = resources.getDimensionPixelSize(R.dimen.collapsed_player_height)
-
-        bottomMargin = bottomNavHeight + collapsedPlayerHeight
+    private fun addMainFragment() {
+        supportFragmentManager
+            .beginTransaction()
+            .add(R.id.main_fragment, MainFragment(), tagMainFragment)
+            .commit()
     }
 
     private fun setupNotifications() {
         direct.instance<INotifyManager>().createChannels()
-    }
-
-    private fun setupViewPager() {
-        val viewpagerAdapter = ViewPagerAdapterMain(supportFragmentManager)
-
-        with(binding.viewPager) {
-            adapter = viewpagerAdapter
-            (layoutParams as ViewGroup.MarginLayoutParams).bottomMargin = bottomMargin
-            offscreenPageLimit = 4
-        }
     }
 
     private fun checkPermission() {

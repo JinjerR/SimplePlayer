@@ -10,17 +10,19 @@ class SearchTracksFragment: SearchFragmentBase<TrackPresenter, TrackViewHolder>(
 
     override val adapter = SearchTracksAdapter(::onItemClick)
 
-    override val viewModel: SearchTracksViewModel by fragmentViewModel()
+    override val searchViewModel: SearchTracksViewModel by fragmentViewModel()
 
     override val searchType: SearchType = SearchType.TRACKS
 
     override fun subscribeToViewModel() {
-//        viewModel.isPlaying.observe(viewLifecycleOwner) { isPlaying ->
-//            adapter.setIsPlaying(isPlaying)
-//        }
+        super.subscribeToViewModel()
+
+        mainViewModel.isPlaying.observe(viewLifecycleOwner) { isPlaying ->
+            adapter.setIsPlaying(isPlaying)
+        }
     }
 
     private fun onItemClick(track: TrackPresenter) {
-        viewModel.playTrack(track.trackId)
+        mainViewModel.play(track.trackId)
     }
 }

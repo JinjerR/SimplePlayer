@@ -14,7 +14,7 @@ class SearchAlbumsFragment: SearchFragmentBase<SearchAlbumPresenter, SearchAlbum
     override var adapter: SearchAlbumsAdapter =
         SearchAlbumsAdapter(ItemAlbumType.VERTICAL, ::onItemClick)
 
-    override val viewModel: SearchAlbumsViewModel by fragmentViewModel()
+    override val searchViewModel: SearchAlbumsViewModel by fragmentViewModel()
 
     override val searchType: SearchType = SearchType.ALBUMS
 

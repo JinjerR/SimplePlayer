@@ -13,16 +13,11 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.media.session.MediaButtonReceiver
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.jinjer.simpleplayer.domain.usecases.GetCurrentTrackIdUseCase
 import com.jinjer.simpleplayer.domain.usecases.GetTracksUseCase
 import com.jinjer.simpleplayer.domain.usecases.SetCurrentTrackIdUseCase
 import com.jinjer.simpleplayer.presentation.R
 import com.jinjer.simpleplayer.presentation.models.mappers.TrackMapper
-import com.jinjer.simpleplayer.presentation.controller.ActionPlayback.actionPlayPause
-import com.jinjer.simpleplayer.presentation.controller.ActionPlayback.actionPositionChanged
-import com.jinjer.simpleplayer.presentation.controller.ActionPlayback.actionTrackChanged
-import com.jinjer.simpleplayer.presentation.controller.ActionPlayback.keyCurrentTrack
-import com.jinjer.simpleplayer.presentation.controller.ActionPlayback.keyPlaybackAction
+import com.jinjer.simpleplayer.presentation.utils.SpConstants.keyCurrentTrack
 import com.jinjer.simpleplayer.presentation.utils.ShowLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +26,6 @@ import com.jinjer.simpleplayer.presentation.controller.service.AppEvent.*
 import com.jinjer.simpleplayer.presentation.controller.service.PlayerState.*
 import com.jinjer.simpleplayer.presentation.models.Track
 import com.jinjer.simpleplayer.presentation.utils.Utils
-import com.jinjer.simpleplayer.presentation.utils.extensions.convertToPlaybackStateName
 import com.jinjer.simpleplayer.presentation.utils.notifications.INotifyManager
 import com.jinjer.simpleplayer.presentation.utils.notifications.NotificationInfo
 import kotlinx.coroutines.withContext
@@ -49,18 +43,15 @@ class MusicService: Service(),
     private lateinit var playerNavigator: IPlayerNavigator
 
     private var appInBackground = false
-    private var actionInitialWasReceived = false
-    private var isTracksLoaded = false
     private var clientMessenger: Messenger? = null
 
     private val simpleName = MusicService::class.java.simpleName
-
     private val getTracks: GetTracksUseCase by instance()
-    private val getCurrentTrack: GetCurrentTrackIdUseCase by instance()
     private val setCurrentTrack: SetCurrentTrackIdUseCase by instance()
     private val notifyManager: INotifyManager by instance()
     private val serviceScope = CoroutineScope(Dispatchers.Main)
     private val mMessenger = Messenger(ServiceHandler(this))
+    private val currentPlaybackData = Bundle()
 
     private val currentPlaybackState: Int
         get() {
@@ -73,10 +64,6 @@ class MusicService: Service(),
 
     private val currentPosition: Long
     get() = player.currentPosition.toLong()
-
-    private val bundleWithPositionAction = Bundle().apply {
-        putString(keyPlaybackAction, actionPositionChanged)
-    }
 
     private val playbackState = Builder().setActions(
         ACTION_PLAY or
@@ -139,6 +126,16 @@ class MusicService: Service(),
                 player.prepareForPlaying(previousTrackId)
             }
         }
+
+        override fun onPrepareFromMediaId(mediaId: String?, extras: Bundle?) {
+            ShowLog.i("$simpleName.mediaSessionCallback.onPrepareFromMediaId()", tagMusicControl)
+            val trackId = mediaId?.toInt() ?: return
+
+            with(playerNavigator) {
+                setTrack(trackId)
+                currentTrack()?.let { player.prepareForPlaying(it.id) }
+            }
+        }
     }
 
     override fun onCreate() {
@@ -192,15 +189,13 @@ class MusicService: Service(),
         }
     }
 
-    private val currentData = Bundle()
-
     override fun onPlayerStateChanged(playerState: PlayerState) {
         ShowLog.i("$simpleName.onPlayerStateChanged() playerState = $playerState", tagMusicControl)
 
         when(playerState) {
             PREPARED, STARTED, PAUSED -> {
                 val currentTrack = playerNavigator.currentTrack() ?: return
-                currentData.putParcelable(keyCurrentTrack, currentTrack)
+                currentPlaybackData.putParcelable(keyCurrentTrack, currentTrack)
 
                 val newPosition = if (playerState == PREPARED) {
                     setCurrentTrack(currentTrack.id)
@@ -223,21 +218,6 @@ class MusicService: Service(),
 
     override fun onTrackPositionChanged(newPosition: Int) {
         changePlaybackState(currentPlaybackState, newPosition.toLong())
-    }
-
-    private fun initialTrackSetup() {
-        val currentTrackId = getCurrentTrack()
-        if (currentTrackId == -1) {
-            playerNavigator.setFirstTrackIfExist()
-        } else {
-            playerNavigator.setTrack(currentTrackId)
-        }
-
-        playerNavigator.currentTrack()?.let { track ->
-            player.prepareForPlaying(track.id)
-        }
-
-        sendMessageToClient(actionTracksLoaded)
     }
 
     private fun updateNotification(startForeground: Boolean = false) {
@@ -303,12 +283,6 @@ class MusicService: Service(),
             ShowLog.i("$simpleName.loadTracks() ${tracks.size} tracks loaded", tagMusicControl)
 
             playerNavigator = PlayerNavigator(tracks)
-
-            if (actionInitialWasReceived) {
-                initialTrackSetup()
-            }
-
-            isTracksLoaded = true
         }
     }
 
@@ -319,7 +293,7 @@ class MusicService: Service(),
             0f
         )
 
-        state.setExtras(currentData)
+        state.setExtras(currentPlaybackData)
 
         mediaSession.setPlaybackState(state.build())
     }
@@ -372,13 +346,7 @@ class MusicService: Service(),
                         clientMessenger = msg.replyTo
                         transmitTokenToClient()
                     }
-                    actionInitialTrack -> {
-                        if (isTracksLoaded) {
-                            initialTrackSetup()
-                        }
-                        actionInitialWasReceived = true
-                    }
-                    appResumes -> {
+                    actionAppResumes -> {
                         if (appInBackground) {
                             appInBackground = false
                             stopForeground(true)
@@ -393,8 +361,6 @@ class MusicService: Service(),
     companion object {
         const val tagMusicControl = "tag_music_control"
         const val actionSessionToken = 1
-        const val actionInitialTrack = 2
-        const val actionTracksLoaded = 3
-        const val appResumes = 4
+        const val actionAppResumes = 4
     }
 }

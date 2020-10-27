@@ -4,7 +4,6 @@ package com.jinjer.simpleplayer.presentation.utils
 
 import android.util.Log
 import com.jinjer.simpleplayer.presentation.BuildConfig
-import com.jinjer.simpleplayer.presentation.base.Application
 
 object ShowLog {
     const val tagTest = "tag_test"

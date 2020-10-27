@@ -5,7 +5,7 @@ import java.util.*
 object TimeUtils {
     private const val separator = ":"
 
-    fun getFormattedSongDurationFromMillis(millis: Long): String {
+    fun getFormattedDurationFromMillis(millis: Long): String {
         val calendar = Calendar.getInstance()
         calendar.time = Date(millis)
 
@@ -19,6 +19,6 @@ object TimeUtils {
     }
 
     fun getFormattedSongDurationFromSeconds(seconds: Int): String {
-        return getFormattedSongDurationFromMillis(seconds * 1000L)
+        return getFormattedDurationFromMillis(seconds * 1000L)
     }
 }

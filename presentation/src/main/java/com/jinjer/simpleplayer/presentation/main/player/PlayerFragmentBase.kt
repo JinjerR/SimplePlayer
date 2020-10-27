@@ -3,18 +3,18 @@ package com.jinjer.simpleplayer.presentation.main.player
 import android.os.Bundle
 import android.view.View
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.jinjer.simpleplayer.presentation.base.BaseActivity
+import com.jinjer.simpleplayer.presentation.base.BaseFragment
 import com.jinjer.simpleplayer.presentation.base.IOnBackPressed
 import com.jinjer.simpleplayer.presentation.bottom_sheet.IBottomSheetParent
 
-abstract class PlayerActivity: BaseActivity(), IBottomSheetParent, IOnBackPressed {
-
+/** contains logic for working with [BottomSheetBehavior].
+ * Needed by those who contain in their [NowPlayingFragment]
+ **/
+abstract class PlayerFragmentBase: BaseFragment(), IBottomSheetParent, IOnBackPressed {
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
 
-    // call this method from subclasses after initialization of the view,
-    // since here we are working with already initialized views
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         setupBottomSheet()
         addPlayer()
@@ -33,7 +33,7 @@ abstract class PlayerActivity: BaseActivity(), IBottomSheetParent, IOnBackPresse
     private fun addPlayer() {
         val fragment = NowPlayingFragment()
 
-        supportFragmentManager
+        childFragmentManager
             .beginTransaction()
             .add(idFragmentPlayer, fragment, null)
             .commit()

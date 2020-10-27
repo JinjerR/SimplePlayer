@@ -12,28 +12,35 @@ import android.support.v4.media.session.MediaSessionCompat
 import androidx.appcompat.app.AppCompatActivity
 import com.jinjer.simpleplayer.presentation.controller.service.MusicService
 import com.jinjer.simpleplayer.presentation.controller.service.MusicService.Companion.tagMusicControl
-import com.jinjer.simpleplayer.presentation.controller.main.IClientCallback
 import com.jinjer.simpleplayer.presentation.controller.service.MusicService.Companion.actionSessionToken
 import com.jinjer.simpleplayer.presentation.utils.ShowLog
 import java.lang.ref.WeakReference
 
-// TODO: class description
+/** communicates with the service
+// (connecting, disconnecting, sending messages to the service) **/
 
 class MediaClientManager(
-    private val context: Context,
+    private val appContext: Context,
     private val clientCallback: IClientCallback
 ): IClientManager {
 
     private val simpleName = MediaClientManager::class.java.simpleName
     private val mMessenger = Messenger(ClientHandler(this))
     private var serviceMessenger: Messenger? = null
-    private val serviceIntent = Intent(context, MusicService::class.java)
+    private val serviceIntent = Intent(appContext, MusicService::class.java)
+    private var tokenReceived = false
+    private var boundToService = false
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             ShowLog.i("$simpleName.onServiceConnected()", tagMusicControl)
-            serviceMessenger = Messenger(service)
-            sendMessage(actionSessionToken)
+
+            serviceMessenger ?: run {
+                serviceMessenger = Messenger(service)
+            }
+            if (tokenReceived.not()) {
+                sendMessage(actionSessionToken)
+            }
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -41,16 +48,29 @@ class MediaClientManager(
         }
     }
 
-    override fun connect() {
-        context.bindService(serviceIntent, serviceConnection, AppCompatActivity.BIND_AUTO_CREATE)
+    override fun bind() {
+        if (boundToService.not()) {
+            appContext.bindService(serviceIntent, serviceConnection, AppCompatActivity.BIND_AUTO_CREATE)
+            boundToService = true
+        }
     }
 
-    override fun disconnect() {
-        context.unbindService(serviceConnection)
-        context.stopService(serviceIntent)
+    override fun unbind() {
+        if (boundToService) {
+            appContext.unbindService(serviceConnection)
+            boundToService = false
+        }
     }
 
-    override fun sendEmptyMessage(action: Int) {
+    override fun startService() {
+        appContext.startService(serviceIntent)
+    }
+
+    override fun stopService() {
+        appContext.stopService(serviceIntent)
+    }
+
+    override fun sendMessageToService(action: Int) {
         sendMessage(action)
     }
 
@@ -72,10 +92,8 @@ class MediaClientManager(
                 when(msg.what) {
                     actionSessionToken -> {
                         val sessionToken = msg.obj as MediaSessionCompat.Token
-                        clientCallback.onConnectedToService(sessionToken)
-                    }
-                    MusicService.actionTracksLoaded -> {
-                        clientCallback.onTracksLoaded()
+                        tokenReceived = true
+                        clientCallback.onTokenReceived(sessionToken)
                     }
                 }
             }

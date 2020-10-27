@@ -1,25 +1,26 @@
 package com.jinjer.simpleplayer.presentation.main.player
 
 import android.content.Context
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
 import androidx.databinding.DataBindingUtil
+import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.jinjer.simpleplayer.presentation.R
-import com.jinjer.simpleplayer.presentation.base.BaseFragment
 import com.jinjer.simpleplayer.presentation.bottom_sheet.IBottomSheetParent
 import com.jinjer.simpleplayer.presentation.databinding.FragmentPlayerBinding
-import com.jinjer.simpleplayer.presentation.utils.ShowLog
+import com.jinjer.simpleplayer.presentation.models.Track
 import com.jinjer.simpleplayer.presentation.utils.TimeUtils
-import com.jinjer.simpleplayer.presentation.utils.extensions.fragmentViewModel
+import com.jinjer.simpleplayer.presentation.utils.Utils
 import com.jinjer.simpleplayer.presentation.utils.extensions.roundUpTwoDecimalPlaces
+import com.jinjer.simpleplayer.presentation.utils.extensions.toSeconds
 
-class PlayerFragment : BaseFragment(), SeekBar.OnSeekBarChangeListener {
+class NowPlayingFragment: NowPlayingFragmentBase(), SeekBar.OnSeekBarChangeListener {
 
-    private val playerViewModel: PlayerFragmentViewModel by fragmentViewModel()
     private lateinit var binding: FragmentPlayerBinding
 
     private var trackingTouch: Boolean = false
@@ -29,7 +30,7 @@ class PlayerFragment : BaseFragment(), SeekBar.OnSeekBarChangeListener {
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
-        bottomSheetParent = context as? IBottomSheetParent
+        bottomSheetParent = parentFragment as? IBottomSheetParent
         bottomSheetParent?.addBottomSheetCallback(bottomSheetCallback)
     }
 
@@ -40,7 +41,6 @@ class PlayerFragment : BaseFragment(), SeekBar.OnSeekBarChangeListener {
     ): View? {
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_player, container, false)
-        binding.viewModel = playerViewModel
         binding.lifecycleOwner = viewLifecycleOwner
 
         return binding.root
@@ -51,10 +51,18 @@ class PlayerFragment : BaseFragment(), SeekBar.OnSeekBarChangeListener {
 
         addPlayerCollapsed()
 
-        binding.progress.setOnSeekBarChangeListener(this)
+        binding.progressBar.setOnSeekBarChangeListener(this)
         binding.fragmentPlayerCollapsed.setOnClickListener(::onCollapsedPlayerClicked)
+        binding.pausePlay.setOnClickListener(::onPlayPauseClicked)
 
-        subscribeToViewModel()
+        binding.rewindForward.setOnClickListener {
+            mainViewModel.skipToNext()
+        }
+        binding.rewindBack.setOnClickListener {
+            mainViewModel.skipToPrevious()
+        }
+
+        subscribeToMainViewModel()
     }
 
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -66,7 +74,35 @@ class PlayerFragment : BaseFragment(), SeekBar.OnSeekBarChangeListener {
     }
     override fun onStopTrackingTouch(seekBar: SeekBar?) {
         trackingTouch = false
-        playerViewModel.rewind(seekBar?.progress ?: 0)
+        mainViewModel.seekTo(seekBar?.progress ?: 0)
+    }
+
+    override fun onTrackChanged(track: Track) {
+        if (track.albumId != -1) {
+            val albumArt = Utils.getAlbumArtUri(track.albumId.toLong())
+            loadAlbumArt(albumArt)
+        }
+
+        val duration = track.duration
+        binding.durationEnd.text = TimeUtils.getFormattedDurationFromMillis(duration)
+        binding.name.text = track.title
+        binding.progressBar.max = track.duration.toSeconds()
+    }
+
+    override fun onPlayIconChanged(resId: Int) {
+        binding.pausePlay.setImageResource(resId)
+    }
+
+    override fun subscribeToMainViewModel() {
+        super.subscribeToMainViewModel()
+
+        mainViewModel.currentPosition.observe(viewLifecycleOwner) { position ->
+            if (trackingTouch) {
+                return@observe
+            }
+
+            binding.progressBar.progress = position.toSeconds()
+        }
     }
 
     private val bottomSheetCallback = object: BottomSheetBehavior.BottomSheetCallback() {
@@ -97,13 +133,13 @@ class PlayerFragment : BaseFragment(), SeekBar.OnSeekBarChangeListener {
         }
     }
 
-    private fun subscribeToViewModel() {
-        playerViewModel.currentSecondsProgress.observe(viewLifecycleOwner) { seconds ->
-            if (trackingTouch) {
-                return@observe
-            }
-
-            binding.progress.progress = seconds
+    private fun loadAlbumArt(uri: Uri) {
+        with(binding.albumImage) {
+            Glide.with(this)
+                .load(uri)
+                .error(R.drawable.icon_empty_album_art)
+                .placeholder(R.drawable.icon_empty_album_art)
+                .into(this)
         }
     }
 

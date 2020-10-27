@@ -2,12 +2,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tool="http://schemas.android.com/tools">
 
-    <data>
-        <variable
-            name="viewModel"
-            type="com.jinjer.simpleplayer.presentation.main.player.CollapsedPlayerViewModel" />
-    </data>
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/collapsed_player_height"
@@ -33,8 +27,7 @@
             android:layout_marginEnd="@dimen/space_half"
             android:layout_marginStart="@dimen/space_half"
             android:textColor="@android:color/white"
-            android:layout_marginBottom="@dimen/space_micro"
-            app:band_name="@{ viewModel.bandName }"/>
+            android:layout_marginBottom="@dimen/space_micro"/>
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/track_name"
@@ -49,8 +42,7 @@
             android:layout_marginEnd="@dimen/space_half"
             android:layout_marginStart="@dimen/space_half"
             android:textColor="@android:color/white"
-            android:layout_marginTop="@dimen/space_micro"
-            app:track_name="@{ viewModel.trackTitle }"/>
+            android:layout_marginTop="@dimen/space_micro"/>
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/img_play"
@@ -62,8 +54,7 @@
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/icon_play"
-            android:layout_marginEnd="@dimen/space"
-            android:onClick="@{ () -> viewModel.onPlayPauseClicked() }"/>
+            android:layout_marginEnd="@dimen/space"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

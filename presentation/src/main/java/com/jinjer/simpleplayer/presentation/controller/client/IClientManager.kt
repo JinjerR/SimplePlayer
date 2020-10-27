@@ -1,9 +1,13 @@
 package com.jinjer.simpleplayer.presentation.controller.client
 
 interface IClientManager {
-    fun connect()
+    fun startService()
 
-    fun disconnect()
+    fun stopService()
 
-    fun sendEmptyMessage(action: Int)
+    fun bind()
+
+    fun unbind()
+
+    fun sendMessageToService(action: Int)
 }

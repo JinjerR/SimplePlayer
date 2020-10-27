@@ -6,13 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import com.jinjer.simpleplayer.presentation.R
-import com.jinjer.simpleplayer.presentation.base.BaseFragment
 import com.jinjer.simpleplayer.presentation.databinding.FragmentCollapsedPlayerBinding
-import com.jinjer.simpleplayer.presentation.utils.extensions.fragmentViewModel
+import com.jinjer.simpleplayer.presentation.models.Track
 
-class CollapsedPlayerFragment: BaseFragment() {
+class CollapsedPlayerFragment: NowPlayingFragmentBase() {
     private lateinit var binding: FragmentCollapsedPlayerBinding
-    private val viewModel: CollapsedPlayerViewModel by fragmentViewModel()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -21,8 +19,22 @@ class CollapsedPlayerFragment: BaseFragment() {
     ): View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_collapsed_player, container, false)
         binding.lifecycleOwner = this
-        binding.viewModel = viewModel
 
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.imgPlay.setOnClickListener(::onPlayPauseClicked)
+    }
+
+    override fun onTrackChanged(track: Track) {
+        binding.trackName.text = track.title
+        binding.bandName.text = track.artist
+    }
+
+    override fun onPlayIconChanged(resId: Int) {
+        binding.imgPlay.setImageResource(resId)
     }
 }
