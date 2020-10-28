@@ -14,8 +14,10 @@ import com.jinjer.simpleplayer.presentation.controller.client.IClientCallback
 import com.jinjer.simpleplayer.presentation.utils.SpConstants
 import com.jinjer.simpleplayer.presentation.controller.client.MediaClientManager
 import com.jinjer.simpleplayer.presentation.controller.service.MusicService
+import com.jinjer.simpleplayer.presentation.controller.service.MusicService.Companion.tagMusicControl
 import com.jinjer.simpleplayer.presentation.models.Track
 import com.jinjer.simpleplayer.presentation.models.mappers.TrackMapper
+import com.jinjer.simpleplayer.presentation.utils.ShowLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -27,6 +29,7 @@ class MainViewModel(
     private val mapper: TrackMapper): AndroidViewModel(app), IClientCallback,
     IPlayerController {
 
+    private val simpleName = MainViewModel::class.java.simpleName
     private val appContext = getApplication<SimplePlayerApp>().applicationContext
     private val mediaClientManager = MediaClientManager(appContext, this)
     private var tracks: List<Track>? = null
@@ -115,6 +118,8 @@ class MainViewModel(
     }
 
     fun onAppResumes() {
+        ShowLog.i("$simpleName.onAppResumes()", tagMusicControl)
+
         if (permissionWasGranted.not()) {
             return
         }
@@ -125,6 +130,8 @@ class MainViewModel(
     }
 
     fun onAppStopped() {
+        ShowLog.i("$simpleName.onAppStopped()", tagMusicControl)
+
         if (permissionWasGranted.not()) {
             return
         }

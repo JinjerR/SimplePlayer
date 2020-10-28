@@ -50,6 +50,7 @@ class MediaClientManager(
 
     override fun bind() {
         if (boundToService.not()) {
+            ShowLog.i("$simpleName.bind()", tagMusicControl)
             appContext.bindService(serviceIntent, serviceConnection, AppCompatActivity.BIND_AUTO_CREATE)
             boundToService = true
         }
@@ -57,6 +58,7 @@ class MediaClientManager(
 
     override fun unbind() {
         if (boundToService) {
+            ShowLog.i("$simpleName.unbind()", tagMusicControl)
             appContext.unbindService(serviceConnection)
             boundToService = false
         }

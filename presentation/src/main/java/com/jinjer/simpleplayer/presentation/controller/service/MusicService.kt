@@ -162,13 +162,19 @@ class MusicService: Service(),
     }
 
     override fun onBind(intent: Intent?): IBinder? {
-        ShowLog.i("$simpleName.onBind(), token = $", tagMusicControl)
+        ShowLog.i("$simpleName.onBind()", tagMusicControl)
         return mMessenger.binder
+    }
+
+    override fun onRebind(intent: Intent?) {
+        super.onRebind(intent)
+        ShowLog.i("$simpleName.onRebind()", tagMusicControl)
+        changePlaybackState(currentPlaybackState, currentPosition)
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
         ShowLog.i("$simpleName.onUnbind()", tagMusicControl)
-        return super.onUnbind(intent)
+        return true
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -283,11 +289,8 @@ class MusicService: Service(),
             ShowLog.i("$simpleName.loadTracks() ${tracks.size} tracks loaded", tagMusicControl)
 
             playerNavigator = PlayerNavigator(tracks)
-
         }
     }
-
-
 
     private fun changePlaybackState(newState: Int, position: Long) {
         val state = playbackState.setState(
