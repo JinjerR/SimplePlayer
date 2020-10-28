@@ -283,8 +283,11 @@ class MusicService: Service(),
             ShowLog.i("$simpleName.loadTracks() ${tracks.size} tracks loaded", tagMusicControl)
 
             playerNavigator = PlayerNavigator(tracks)
+
         }
     }
+
+
 
     private fun changePlaybackState(newState: Int, position: Long) {
         val state = playbackState.setState(

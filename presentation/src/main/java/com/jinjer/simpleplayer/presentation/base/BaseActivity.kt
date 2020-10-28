@@ -3,7 +3,7 @@ package com.jinjer.simpleplayer.presentation.base
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.jinjer.simpleplayer.presentation.di.activityViewModelsModule
+import com.jinjer.simpleplayer.presentation.di.viewModelsModule
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.android.closestDI
@@ -15,7 +15,7 @@ abstract class BaseActivity: AppCompatActivity(), DIAware {
 
     override val di: DI = DI.lazy {
         extend(parentDi)
-        import(activityViewModelsModule)
+        import(viewModelsModule)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

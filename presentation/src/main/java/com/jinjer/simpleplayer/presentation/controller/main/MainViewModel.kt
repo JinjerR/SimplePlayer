@@ -15,6 +15,7 @@ import com.jinjer.simpleplayer.presentation.utils.SpConstants
 import com.jinjer.simpleplayer.presentation.controller.client.MediaClientManager
 import com.jinjer.simpleplayer.presentation.controller.service.MusicService
 import com.jinjer.simpleplayer.presentation.models.Track
+import com.jinjer.simpleplayer.presentation.models.mappers.TrackMapper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -22,11 +23,13 @@ import kotlinx.coroutines.withContext
 class MainViewModel(
     app: SimplePlayerApp,
     private val getTracks: GetTracksUseCase,
-    private val getCurrentTrackId: GetCurrentTrackIdUseCase): AndroidViewModel(app), IClientCallback,
+    private val getCurrentTrackId: GetCurrentTrackIdUseCase,
+    private val mapper: TrackMapper): AndroidViewModel(app), IClientCallback,
     IPlayerController {
 
     private val appContext = getApplication<SimplePlayerApp>().applicationContext
     private val mediaClientManager = MediaClientManager(appContext, this)
+    private var tracks: List<Track>? = null
 
     private var mediaController: MediaControllerCompat? = null
     private var mediaControllerWasRegistered = false
@@ -53,7 +56,10 @@ class MainViewModel(
         registerMediaController()
 
         getCurrentTrackId().let { id ->
-            playerControls.prepareFromMediaId(id.toString(), null)
+            val trackId = if (id == -1) tracks?.firstOrNull()?.id else id
+            trackId?.let {
+                playerControls.prepareFromMediaId(it.toString(), null)
+            }
         }
     }
 
@@ -96,12 +102,11 @@ class MainViewModel(
         permissionWasGranted = true
 
         viewModelScope.launch {
-            val wasLoaded = withContext(Dispatchers.Default) {
-                getTracks()
-                true
+            tracks = withContext(Dispatchers.IO) {
+                mapper.fromList(getTracks())
             }
 
-            if (wasLoaded) {
+            if (tracks.isNullOrEmpty().not()) {
                 mediaClientManager.startService()
                 mediaClientManager.bind()
                 mIsTracksLoaded.value = true
@@ -110,12 +115,20 @@ class MainViewModel(
     }
 
     fun onAppResumes() {
+        if (permissionWasGranted.not()) {
+            return
+        }
+
         registerMediaController()
         mediaClientManager.bind()
         mediaClientManager.sendMessageToService(MusicService.actionAppResumes)
     }
 
     fun onAppStopped() {
+        if (permissionWasGranted.not()) {
+            return
+        }
+
         unregisterMediaController()
         mediaClientManager.unbind()
     }
