@@ -26,7 +26,6 @@ import kotlinx.coroutines.launch
 import com.jinjer.simpleplayer.presentation.controller.service.AppEvent.*
 import com.jinjer.simpleplayer.presentation.controller.service.PlayerState.*
 import com.jinjer.simpleplayer.presentation.models.Track
-import com.jinjer.simpleplayer.presentation.utils.ShowLog.tagTest
 import com.jinjer.simpleplayer.presentation.utils.Utils
 import com.jinjer.simpleplayer.presentation.utils.notifications.INotifyManager
 import com.jinjer.simpleplayer.presentation.utils.notifications.NotificationInfo

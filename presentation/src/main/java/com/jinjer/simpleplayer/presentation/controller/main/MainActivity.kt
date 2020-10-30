@@ -18,12 +18,15 @@ import com.jinjer.simpleplayer.presentation.utils.notifications.INotifyManager
 import org.kodein.di.direct
 import org.kodein.di.instance
 
+// TODO: very long vector path (lint check)
+
 class MainActivity: BaseActivity(), IMainController {
 
     private lateinit var binding: ActivityMainBinding
     private val mainViewModel: MainViewModel by activityViewModel()
 
     private val requestCodeReadPermission = 1
+    @Suppress("unused")
     private val simpleName = MainActivity::class.java.simpleName
     private var readPermissionGranted = false
 

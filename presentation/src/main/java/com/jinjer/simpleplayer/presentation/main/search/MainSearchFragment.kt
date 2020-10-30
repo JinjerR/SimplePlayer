@@ -83,10 +83,10 @@ class MainSearchFragment : BaseFragment(), IOnSearchChangeListener, IOnItemCount
         }
     }
 
-    override fun onSearchQueryChanged(newText: String) {
+    override fun onSearchQueryChanged(query: String) {
         for (fragment in childFragmentManager.fragments) {
             if (fragment is IOnSearchChangeListener) {
-                fragment.onSearchQueryChanged(newText)
+                fragment.onSearchQueryChanged(query)
             }
         }
     }

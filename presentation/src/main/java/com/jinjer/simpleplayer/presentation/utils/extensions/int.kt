@@ -1,5 +1,6 @@
 package com.jinjer.simpleplayer.presentation.utils.extensions
 
+@Suppress("unused")
 fun Int.playbackStateToString():String {
     return when(this) {
         0 -> "STATE_NONE"

@@ -4,12 +4,12 @@ import android.os.Parcelable
 import com.jinjer.simpleplayer.presentation.controller.service.MusicService.Companion.tagMusicControl
 import com.jinjer.simpleplayer.presentation.controller.service.QueueType.*
 import com.jinjer.simpleplayer.presentation.utils.ShowLog
-import com.jinjer.simpleplayer.presentation.utils.ShowLog.tagTest
 import kotlinx.android.parcel.Parcelize
 import kotlin.collections.ArrayList
 
 enum class QueueType {
     ALL_TRACKS,
+    @Suppress("unused")
     SINGER,
     ALBUM
 }

@@ -1,10 +1,12 @@
 package com.jinjer.simpleplayer.data.repositories
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.provider.MediaStore
 import com.jinjer.simpleplayer.domain.models.TrackDomain
 
 class LocalMusicSource(private val appContext: Context): IMusicSource {
+    @SuppressLint("InlinedApi")
     override suspend fun getTracks(): List<TrackDomain> {
         val data = mutableListOf<TrackDomain>()
 
@@ -20,7 +22,6 @@ class LocalMusicSource(private val appContext: Context): IMusicSource {
                 val albumIndex = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)
                 val albumIdIndex = cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)
 
-                // TODO: correctness
                 val durationIndex = cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)
 
                 do {

@@ -2,7 +2,6 @@ package com.jinjer.simpleplayer.presentation.main.search
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.jinjer.simpleplayer.presentation.main.search.albums.SearchAlbumsFragment

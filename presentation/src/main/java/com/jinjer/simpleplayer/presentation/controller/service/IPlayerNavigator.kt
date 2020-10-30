@@ -1,7 +1,5 @@
 package com.jinjer.simpleplayer.presentation.controller.service
 
-import com.jinjer.simpleplayer.presentation.models.Track
-
 interface IPlayerNavigator {
     fun currentTrack(): Int?
 

@@ -12,6 +12,7 @@ enum class PlayerState {
     PAUSED,
     STOPPED,
     COMPLETED,
+    @Suppress("unused")
     END,
     NONE;
 
@@ -28,6 +29,7 @@ enum class PlayerState {
             }
         }
 
+        @Suppress("unused")
         fun convertFromPlaybackState(playbackState: Int): PlayerState {
             return when(playbackState) {
                 PlaybackStateCompat.STATE_ERROR -> ERROR

@@ -7,7 +7,6 @@ import com.jinjer.simpleplayer.presentation.main.player.PlayerFragmentWithConten
 class AlbumDetailsFragment: PlayerFragmentWithContent() {
     companion object {
         const val keyAlbumId = "key_album_id"
-        const val keyAlbumDetails = "key_album_details"
 
         fun newInstance(albumId: Int): AlbumDetailsFragment = AlbumDetailsFragment().apply {
             arguments = Bundle().apply {

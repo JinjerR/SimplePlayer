@@ -17,7 +17,6 @@
 
     <!-- search -->
     <string name="search_nothing_found">Nothing Found</string>
-    <string name="title_activity_album">AlbumActivity</string>
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

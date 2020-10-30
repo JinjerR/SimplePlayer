@@ -12,7 +12,6 @@ import com.jinjer.simpleplayer.presentation.controller.service.PlayerNavigator
 import com.jinjer.simpleplayer.presentation.controller.service.QueueData
 import com.jinjer.simpleplayer.presentation.databinding.FragmentTracksBinding
 import com.jinjer.simpleplayer.presentation.main.tracks.recycler_view.TracksAdapter
-import com.jinjer.simpleplayer.presentation.utils.ShowLog
 import com.jinjer.simpleplayer.presentation.utils.extensions.fragmentViewModel
 
 class TracksFragment : BaseFragment() {
@@ -58,7 +57,6 @@ class TracksFragment : BaseFragment() {
 
     private fun subscribeToMainViewModel() {
         mainViewModel.isPlaying.observe(viewLifecycleOwner) { isPlaying ->
-            ShowLog.i("TracksFragment islpaying changed = $isPlaying", ShowLog.tagTest)
             tracksAdapter.setIsPlaying(isPlaying)
         }
         mainViewModel.isTracksLoaded.observe(viewLifecycleOwner) { isTracksLoaded ->

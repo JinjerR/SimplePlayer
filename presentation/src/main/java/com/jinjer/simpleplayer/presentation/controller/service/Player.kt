@@ -159,7 +159,7 @@ class Player(private val context: Context, private val stateChangeListener: IPla
 
         // TODO: firebase
         val mediaPlayerException = MediaPlayerException(what, extra, playerState)
-//        FirebaseCrashlytics.getInstance().recordException(mediaPlayerException)
+//        Firebase Crash analytics.getInstance().recordException(mediaPlayerException)
 
         resetInternal()
 

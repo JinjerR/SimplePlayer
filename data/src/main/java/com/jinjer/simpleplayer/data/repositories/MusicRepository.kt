@@ -6,7 +6,7 @@ import com.jinjer.simpleplayer.domain.models.AlbumDetailsDomain
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-// TODO: maybe need to make a hashmap instead of a list
+// TODO: maybe need to make a hashMap instead of a list
 
 class MusicRepository(private val localMusicSource: LocalMusicSource): IMusicRepository {
     private var tracks: List<TrackDomain>? = null

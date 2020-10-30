@@ -22,8 +22,6 @@ import com.jinjer.simpleplayer.presentation.controller.service.QueueData
 import com.jinjer.simpleplayer.presentation.models.Track
 import com.jinjer.simpleplayer.presentation.models.mappers.TrackMapper
 import com.jinjer.simpleplayer.presentation.utils.ShowLog
-import com.jinjer.simpleplayer.presentation.utils.ShowLog.tagTest
-import com.jinjer.simpleplayer.presentation.utils.extensions.playbackStateToString
 import kotlinx.coroutines.launch
 
 class MainViewModel(
