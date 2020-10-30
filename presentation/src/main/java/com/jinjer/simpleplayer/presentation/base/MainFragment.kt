@@ -58,12 +58,13 @@ class MainFragment: PlayerFragmentBase(), OnNavigationItemSelectedListener {
     }
 
     private fun setupViewPager() {
-        val viewpagerAdapter = ViewPagerAdapterMain(childFragmentManager)
+        val viewpagerAdapter = ViewPagerAdapterMain(childFragmentManager, lifecycle)
 
         with(mainBinding.viewPager) {
             adapter = viewpagerAdapter
             (layoutParams as ViewGroup.MarginLayoutParams).bottomMargin = getBottomMargin()
             offscreenPageLimit = 4
+            isUserInputEnabled = false
         }
     }
 }

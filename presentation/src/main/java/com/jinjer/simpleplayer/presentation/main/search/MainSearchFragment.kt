@@ -75,9 +75,12 @@ class MainSearchFragment : BaseFragment(), IOnSearchChangeListener, IOnItemCount
     }
 
     private fun initViewPager() {
-        val adapter = SearchViewPagerAdapter(childFragmentManager)
-        binding.viewPager.adapter = adapter
-        binding.viewPager.offscreenPageLimit = 3
+        val searchAdapter = SearchViewPagerAdapter(childFragmentManager, lifecycle)
+        with(binding.viewPager) {
+            adapter = searchAdapter
+            offscreenPageLimit = 3
+            isUserInputEnabled = false
+        }
     }
 
     override fun onSearchQueryChanged(newText: String) {

@@ -57,7 +57,7 @@
             app:searchNavTitle="@string/albums"
             android:layout_marginEnd="@dimen/space"/>
 
-        <com.jinjer.simpleplayer.presentation.navigation.ViewPagerOffSwipe
+        <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/view_pager"
             android:layout_width="0dp"
             android:layout_height="0dp"
