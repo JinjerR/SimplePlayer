@@ -8,15 +8,25 @@ import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jinjer.simpleplayer.presentation.R
 import com.jinjer.simpleplayer.presentation.base.BaseFragment
+import com.jinjer.simpleplayer.presentation.controller.service.PlayerNavigator
+import com.jinjer.simpleplayer.presentation.controller.service.QueueData
 import com.jinjer.simpleplayer.presentation.databinding.FragmentTracksBinding
 import com.jinjer.simpleplayer.presentation.main.tracks.recycler_view.TracksAdapter
+import com.jinjer.simpleplayer.presentation.utils.ShowLog
 import com.jinjer.simpleplayer.presentation.utils.extensions.fragmentViewModel
 
 class TracksFragment : BaseFragment() {
+
     private val tracksViewModel: TracksViewModel by fragmentViewModel()
     private lateinit var binding: FragmentTracksBinding
     private val tracksAdapter = TracksAdapter(::onTrackClicked)
 
+    private var queueData: QueueData? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        queueData = arguments?.getParcelable(PlayerNavigator.keyQueueData)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,11 +58,13 @@ class TracksFragment : BaseFragment() {
 
     private fun subscribeToMainViewModel() {
         mainViewModel.isPlaying.observe(viewLifecycleOwner) { isPlaying ->
+            ShowLog.i("TracksFragment islpaying changed = $isPlaying", ShowLog.tagTest)
             tracksAdapter.setIsPlaying(isPlaying)
         }
         mainViewModel.isTracksLoaded.observe(viewLifecycleOwner) { isTracksLoaded ->
             if (isTracksLoaded) {
-                tracksViewModel.onTracksLoaded()
+                val tracks: List<TrackPresenter>? = arguments?.getParcelableArrayList(keyTracks)
+                tracksViewModel.onTracksLoaded(tracks)
             }
         }
         mainViewModel.currentTrack.observe(viewLifecycleOwner) { track ->
@@ -68,6 +80,17 @@ class TracksFragment : BaseFragment() {
     }
 
     private fun onTrackClicked(track: TrackPresenter) {
-        mainViewModel.play(track.trackId)
+        mainViewModel.play(track.trackId, queueData ?: QueueData.buildAllTracksData())
+    }
+
+    companion object {
+        const val keyTracks = "key_tracks"
+
+        fun newInstance(tracks: List<TrackPresenter>? = null, queueData: QueueData): TracksFragment = TracksFragment().apply {
+            arguments = Bundle().apply {
+                tracks?.let { putParcelableArrayList(keyTracks, ArrayList(it)) }
+                putParcelable(PlayerNavigator.keyQueueData, queueData)
+            }
+        }
     }
 }

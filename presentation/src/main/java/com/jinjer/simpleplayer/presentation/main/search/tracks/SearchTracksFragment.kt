@@ -1,5 +1,6 @@
 package com.jinjer.simpleplayer.presentation.main.search.tracks
 
+import com.jinjer.simpleplayer.presentation.controller.service.QueueData
 import com.jinjer.simpleplayer.presentation.main.search.SearchType
 import com.jinjer.simpleplayer.presentation.main.search.base.SearchFragmentBase
 import com.jinjer.simpleplayer.presentation.main.tracks.recycler_view.TrackViewHolder
@@ -23,6 +24,6 @@ class SearchTracksFragment: SearchFragmentBase<TrackPresenter, TrackViewHolder>(
     }
 
     private fun onItemClick(track: TrackPresenter) {
-        mainViewModel.play(track.trackId)
+        mainViewModel.play(track.trackId, QueueData.buildAllTracksData())
     }
 }

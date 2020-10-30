@@ -1,24 +1,50 @@
 package com.jinjer.simpleplayer.presentation.controller.service
 
-import com.jinjer.simpleplayer.presentation.models.Track
+import android.os.Parcelable
 import com.jinjer.simpleplayer.presentation.controller.service.MusicService.Companion.tagMusicControl
+import com.jinjer.simpleplayer.presentation.controller.service.QueueType.*
 import com.jinjer.simpleplayer.presentation.utils.ShowLog
+import com.jinjer.simpleplayer.presentation.utils.ShowLog.tagTest
+import kotlinx.android.parcel.Parcelize
 import kotlin.collections.ArrayList
 
-class PlayerNavigator(private val tracks: List<Track>): IPlayerNavigator {
+enum class QueueType {
+    ALL_TRACKS,
+    SINGER,
+    ALBUM
+}
+
+@Parcelize
+data class QueueData(
+    val id: Int,
+    val trackIds: List<Int>,
+    val type: QueueType
+): Parcelable {
+    companion object {
+        fun buildAllTracksData(): QueueData {
+            return QueueData(-1,  emptyList(), ALL_TRACKS)
+        }
+        fun buildAlbumQueue(albumId: Int, trackIds: List<Int>): QueueData {
+            return QueueData(albumId, trackIds, ALBUM)
+        }
+    }
+}
+
+// TODO: class description
+class PlayerNavigator(private val trackIds: List<Int>): IPlayerNavigator {
     private val simpleName = PlayerNavigator::class.java.simpleName
-    private val currentQueue = ArrayList(tracks)
+    private val currentQueue = ArrayList(trackIds)
 
     private var currentIdx = -1
 
-    override fun currentTrack(): Track? {
+    override fun currentTrack(): Int? {
         return currentQueue.getOrNull(currentIdx) ?: run {
             ShowLog.w("$simpleName.currentTrack() queue size = ${ currentQueue.size }, currentIdx = $currentIdx", tagMusicControl)
             null
         }
     }
 
-    override fun nextTrack(): Track? {
+    override fun nextTrack(): Int? {
         if (currentQueue.isEmpty()) {
             ShowLog.w("$simpleName.nextTrack() current queue is empty", tagMusicControl)
             return null
@@ -31,7 +57,7 @@ class PlayerNavigator(private val tracks: List<Track>): IPlayerNavigator {
         return currentQueue[currentIdx]
     }
 
-    override fun previousTrack(): Track? {
+    override fun previousTrack(): Int? {
         if (currentQueue.isEmpty()) {
             ShowLog.w("$simpleName.previousTrack() current queue is empty", tagMusicControl)
             return null
@@ -45,7 +71,7 @@ class PlayerNavigator(private val tracks: List<Track>): IPlayerNavigator {
     }
 
     override fun setTrack(trackId: Int): Boolean {
-        val idx = currentQueue.indexOfFirst { it.id == trackId }
+        val idx = currentQueue.indexOfFirst { it == trackId }
         return if (idx == -1) {
             ShowLog.w("$simpleName.setTrack() track with id = $trackId was not found in the current queue", tagMusicControl)
             false
@@ -61,34 +87,28 @@ class PlayerNavigator(private val tracks: List<Track>): IPlayerNavigator {
         }
     }
 
-    override fun playAlbum(albumId: Int): Track? {
-        return tracks.first()
+    override fun setQueue(queueData: QueueData, initialTrackId: Int?) {
+        setQueueInternal(queueData)
+        initialTrackId?.let { setTrack(it) }
     }
 
-    override fun playArtist(artistId: Int): Track? {
-        return tracks.first()
+    private fun setQueueInternal(queueData: QueueData) {
+        val currentTrackIdx = currentTrack()
+
+        val trackList = if (queueData.type == ALL_TRACKS)
+            trackIds
+        else
+            queueData.trackIds
+
+        currentQueue.clear()
+        currentQueue.addAll(trackList)
+
+        currentTrackIdx?.let {
+            setTrack(it)
+        }
     }
 
-//    private fun buildBrowseTree() {
-//        var artistId: Int
-//        var artistMap: HashMap<Int, MutableList<Track>>
-//        var albumId: Int
-//
-//        for (track in tracks) {
-//            artistId = track.artistId
-//            albumId = track.albumId
-//
-//            if (trackMap.containsKey(artistId).not()) {
-//                trackMap[artistId] = HashMap()
-//            }
-//
-//            artistMap = trackMap[artistId]!!
-//
-//            if (artistMap.containsKey(albumId).not()) {
-//                artistMap[albumId] = mutableListOf()
-//            }
-//
-//            artistMap[albumId]?.add(track)
-//        }
-//    }
+    companion object {
+        const val keyQueueData = "key_queue_data"
+    }
 }

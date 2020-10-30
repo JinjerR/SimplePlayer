@@ -13,6 +13,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.media.session.MediaButtonReceiver
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.jinjer.simpleplayer.domain.usecases.GetTrackByIdUseCase
 import com.jinjer.simpleplayer.domain.usecases.GetTracksUseCase
 import com.jinjer.simpleplayer.domain.usecases.SetCurrentTrackIdUseCase
 import com.jinjer.simpleplayer.presentation.R
@@ -25,6 +26,7 @@ import kotlinx.coroutines.launch
 import com.jinjer.simpleplayer.presentation.controller.service.AppEvent.*
 import com.jinjer.simpleplayer.presentation.controller.service.PlayerState.*
 import com.jinjer.simpleplayer.presentation.models.Track
+import com.jinjer.simpleplayer.presentation.utils.ShowLog.tagTest
 import com.jinjer.simpleplayer.presentation.utils.Utils
 import com.jinjer.simpleplayer.presentation.utils.notifications.INotifyManager
 import com.jinjer.simpleplayer.presentation.utils.notifications.NotificationInfo
@@ -47,6 +49,7 @@ class MusicService: Service(),
 
     private val simpleName = MusicService::class.java.simpleName
     private val getTracks: GetTracksUseCase by instance()
+    private val getTrackById: GetTrackByIdUseCase by instance()
     private val setCurrentTrack: SetCurrentTrackIdUseCase by instance()
     private val notifyManager: INotifyManager by instance()
     private val serviceScope = CoroutineScope(Dispatchers.Main)
@@ -74,7 +77,7 @@ class MusicService: Service(),
                 ACTION_SKIP_TO_PREVIOUS or
                 ACTION_SEEK_TO or
                 ACTION_PLAY_FROM_MEDIA_ID or
-                ACTION_PREPARE_FROM_SEARCH
+                ACTION_PREPARE_FROM_MEDIA_ID
     )
 
     private val mediaSessionCallback: MediaSessionCompat.Callback = object : MediaSessionCompat.Callback() {
@@ -98,19 +101,6 @@ class MusicService: Service(),
             player.seekTo(pos.toInt())
         }
 
-        override fun onPlayFromMediaId(mediaId: String?, extras: Bundle?) {
-            ShowLog.i("$simpleName.mediaSessionCallback.onPlayFromMediaId() mediaId = $mediaId, extras = $extras", tagMusicControl)
-
-            val trackId = mediaId?.toIntOrNull() ?: run {
-                ShowLog.w("$simpleName.onPlayFromMediaId() track id is null", tagMusicControl)
-                return
-            }
-
-            if (playerNavigator.setTrack(trackId)) {
-                player.play(trackId)
-            }
-        }
-
         override fun onSkipToNext() {
             ShowLog.i("$simpleName.mediaSessionCallBack.onSkipToNext()", tagMusicControl)
             skipToNext(false)
@@ -119,7 +109,7 @@ class MusicService: Service(),
         override fun onSkipToPrevious() {
             ShowLog.i("$simpleName.mediaSessionCallback.onSkipToPrevious()", tagMusicControl)
 
-            val previousTrackId = playerNavigator.previousTrack()?.id ?: return
+            val previousTrackId = playerNavigator.previousTrack()?: return
             if (player.isPlaying) {
                 player.play(previousTrackId)
             } else {
@@ -133,7 +123,29 @@ class MusicService: Service(),
 
             with(playerNavigator) {
                 setTrack(trackId)
-                currentTrack()?.let { player.prepareForPlaying(it.id) }
+                currentTrack()?.let { player.prepareForPlaying(it) }
+            }
+        }
+
+        override fun onPlayFromMediaId(mediaId: String?, extras: Bundle?) {
+            ShowLog.i("$simpleName.mediaSessionCallback.onPlayFromMediaId() mediaId = $mediaId, extras = $extras", tagMusicControl)
+
+            val trackId = mediaId?.toIntOrNull() ?: run {
+                ShowLog.w("$simpleName.onPlayFromMediaId() track id is null", tagMusicControl)
+                return
+            }
+
+            playerNavigator.setTrack(trackId)
+            player.play(trackId)
+        }
+
+        override fun onCustomAction(action: String?, extras: Bundle?) {
+            ShowLog.i("$simpleName.mediaSessionCallback.onCustomAction() action = $action, extras = $extras", tagMusicControl)
+
+            if (action == actionUpdateQueue) {
+                extras?.getParcelable<QueueData>(PlayerNavigator.keyQueueData)?.let { queueData ->
+                    playerNavigator.setQueue(queueData)
+                }
             }
         }
     }
@@ -169,6 +181,8 @@ class MusicService: Service(),
     override fun onRebind(intent: Intent?) {
         super.onRebind(intent)
         ShowLog.i("$simpleName.onRebind()", tagMusicControl)
+
+        // deliver fresh data to ui
         changePlaybackState(currentPlaybackState, currentPosition)
     }
 
@@ -200,11 +214,11 @@ class MusicService: Service(),
 
         when(playerState) {
             PREPARED, STARTED, PAUSED -> {
-                val currentTrack = playerNavigator.currentTrack() ?: return
-                currentPlaybackData.putParcelable(keyCurrentTrack, currentTrack)
+                val currentTrackId = playerNavigator.currentTrack() ?: return
+                currentPlaybackData.putInt(keyCurrentTrack, currentTrackId)
 
                 val newPosition = if (playerState == PREPARED) {
-                    setCurrentTrack(currentTrack.id)
+                    setCurrentTrack(currentTrackId)
                     0L
                 } else {
                     currentPosition
@@ -232,10 +246,9 @@ class MusicService: Service(),
         }
 
         serviceScope.launch {
-            val currentTrack = playerNavigator.currentTrack() ?: return@launch
-            val notifyInfo = withContext(Dispatchers.IO) {
-                buildNotificationInfo(currentTrack)
-            }
+            val trackId = playerNavigator.currentTrack() ?: return@launch
+            val currentTrack = getTrackById(trackId)?.let { TrackMapper().from(it) } ?: return@launch
+            val notifyInfo = buildNotificationInfo(currentTrack)
 
             if (startForeground) {
                 startForeground(notifyManager.getNotificationId(), notifyManager.getNotification(notifyInfo))
@@ -245,10 +258,10 @@ class MusicService: Service(),
         }
     }
 
-    private fun buildNotificationInfo(track: Track): NotificationInfo {
+    private suspend fun buildNotificationInfo(track: Track): NotificationInfo = withContext(Dispatchers.Default) {
         fun loadNotificationThumbnail(uri: Uri): Bitmap? {
             return try {
-                Glide.with(this)
+                Glide.with(applicationContext)
                     .asBitmap()
                     .load(uri)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -264,7 +277,7 @@ class MusicService: Service(),
         val albumUri = Utils.getAlbumArtUri(track.albumId.toLong())
         val bitmap = loadNotificationThumbnail(albumUri)
 
-        return NotificationInfo(
+        return@withContext NotificationInfo(
             track.title,
             track.artist,
             player.isPlaying,
@@ -273,7 +286,7 @@ class MusicService: Service(),
     }
 
     private fun skipToNext(afterCompletion: Boolean) {
-        val nextTrackId = playerNavigator.nextTrack()?.id ?: return
+        val nextTrackId = playerNavigator.nextTrack()?: return
         if (player.isPlaying || afterCompletion) {
             player.play(nextTrackId)
         } else {
@@ -283,12 +296,10 @@ class MusicService: Service(),
 
     private fun loadTracks() {
         serviceScope.launch {
-            val mapper = TrackMapper()
-            val tracks = withContext(Dispatchers.IO) { mapper.fromList(getTracks()) }
+            val trackIds = getTracks().map { it.id }
+            playerNavigator = PlayerNavigator(trackIds)
 
-            ShowLog.i("$simpleName.loadTracks() ${tracks.size} tracks loaded", tagMusicControl)
-
-            playerNavigator = PlayerNavigator(tracks)
+            ShowLog.i("$simpleName.loadTracks() ${trackIds.size} tracks loaded", tagMusicControl)
         }
     }
 
@@ -366,6 +377,7 @@ class MusicService: Service(),
 
     companion object {
         const val tagMusicControl = "tag_music_control"
+        const val actionUpdateQueue = "action_update_queue"
         const val actionSessionToken = 1
         const val actionAppResumes = 4
     }

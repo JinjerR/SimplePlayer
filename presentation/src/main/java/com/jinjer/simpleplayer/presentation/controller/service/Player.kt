@@ -57,10 +57,6 @@ class Player(private val context: Context, private val stateChangeListener: IPla
         get() = mediaPlayer?.isPlaying ?: false
 
     private var playerState: PlayerState = IDLE
-        set(value) {
-            stateChangeListener.onPlayerStateChanged(value)
-            field = value
-        }
 
     private var mediaPlayer: MediaPlayer? = MediaPlayer().apply {
         setOnErrorListener(this@Player)
@@ -148,17 +144,18 @@ class Player(private val context: Context, private val stateChangeListener: IPla
     }
 
     override fun onPrepared(mp: MediaPlayer?) {
-        playerState = PREPARED
-
         if (playAfterPrepare) {
+            updatePlayerState(PREPARED, false)
             startInternal()
+        } else {
+            updatePlayerState(PREPARED, true)
         }
     }
 
     override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
         ShowLog.e("$simpleName.onError() mp = $mp, what = $what, extra = $extra", tagMusicControl)
 
-        playerState = ERROR
+        updatePlayerState(ERROR)
 
         // TODO: firebase
         val mediaPlayerException = MediaPlayerException(what, extra, playerState)
@@ -170,7 +167,7 @@ class Player(private val context: Context, private val stateChangeListener: IPla
     }
 
     override fun onCompletion(mp: MediaPlayer?) {
-        playerState = COMPLETED
+        updatePlayerState(COMPLETED)
     }
 
     override fun onAudioFocusChange(focusChange: Int) {
@@ -187,7 +184,7 @@ class Player(private val context: Context, private val stateChangeListener: IPla
         val songUri = Utils.getSongUri(trackId.toLong())
         try {
             mp.setDataSource(context, songUri)
-            playerState = INITIALIZED
+            updatePlayerState(INITIALIZED)
         } catch (e: Exception) {
             resetInternal()
         }
@@ -204,7 +201,7 @@ class Player(private val context: Context, private val stateChangeListener: IPla
                 currentTrackId = trackId
 
                 mediaPlayer?.prepareAsync()
-                playerState = PREPARING
+                updatePlayerState(PREPARING)
                 this.playAfterPrepare = playAfterPrepare
             }
             PAUSED, PREPARED -> {
@@ -215,7 +212,7 @@ class Player(private val context: Context, private val stateChangeListener: IPla
             }
             INITIALIZED, STOPPED -> {
                 mediaPlayer?.prepareAsync()
-                playerState = PREPARING
+                updatePlayerState(PREPARING)
                 this.playAfterPrepare = playAfterPrepare
             }
             else -> {
@@ -228,7 +225,7 @@ class Player(private val context: Context, private val stateChangeListener: IPla
         val mp = mediaPlayer ?: return
 
         mp.reset()
-        playerState = IDLE
+        updatePlayerState(IDLE)
     }
 
     private fun stopInternal() {
@@ -237,7 +234,7 @@ class Player(private val context: Context, private val stateChangeListener: IPla
         when(playerState) {
             PREPARED, STARTED, PAUSED -> {
                 mp.stop()
-                playerState = STOPPED
+                updatePlayerState(STOPPED)
                 updatePositionBehavior()
             }
             else -> {
@@ -256,7 +253,7 @@ class Player(private val context: Context, private val stateChangeListener: IPla
         when(playerState) {
             PREPARED, PAUSED -> {
                 mp.start()
-                playerState = STARTED
+                updatePlayerState(STARTED)
                 updatePositionBehavior()
             }
             else -> {
@@ -270,7 +267,7 @@ class Player(private val context: Context, private val stateChangeListener: IPla
 
         if (playerState == STARTED) {
             mp.pause()
-            playerState = PAUSED
+            updatePlayerState(PAUSED)
             updatePositionBehavior()
         } else {
             ShowLog.w("$simpleName.pause() called in wrong state, playerState = $playerState", tagMusicControl)
@@ -328,6 +325,13 @@ class Player(private val context: Context, private val stateChangeListener: IPla
             startUpdatePosition()
         } else {
             stopUpdatePosition()
+        }
+    }
+
+    private fun updatePlayerState(newState: PlayerState, callListener: Boolean = true) {
+        playerState = newState
+        if (callListener) {
+            stateChangeListener.onPlayerStateChanged(newState)
         }
     }
 }

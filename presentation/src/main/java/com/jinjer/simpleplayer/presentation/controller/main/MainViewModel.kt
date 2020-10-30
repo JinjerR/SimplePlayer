@@ -1,5 +1,6 @@
 package com.jinjer.simpleplayer.presentation.controller.main
 
+import android.os.Bundle
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -8,6 +9,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.jinjer.simpleplayer.domain.usecases.GetCurrentTrackIdUseCase
+import com.jinjer.simpleplayer.domain.usecases.GetTrackByIdUseCase
 import com.jinjer.simpleplayer.domain.usecases.GetTracksUseCase
 import com.jinjer.simpleplayer.presentation.base.SimplePlayerApp
 import com.jinjer.simpleplayer.presentation.controller.client.IClientCallback
@@ -15,20 +17,24 @@ import com.jinjer.simpleplayer.presentation.utils.SpConstants
 import com.jinjer.simpleplayer.presentation.controller.client.MediaClientManager
 import com.jinjer.simpleplayer.presentation.controller.service.MusicService
 import com.jinjer.simpleplayer.presentation.controller.service.MusicService.Companion.tagMusicControl
+import com.jinjer.simpleplayer.presentation.controller.service.PlayerNavigator
+import com.jinjer.simpleplayer.presentation.controller.service.QueueData
 import com.jinjer.simpleplayer.presentation.models.Track
 import com.jinjer.simpleplayer.presentation.models.mappers.TrackMapper
 import com.jinjer.simpleplayer.presentation.utils.ShowLog
-import kotlinx.coroutines.Dispatchers
+import com.jinjer.simpleplayer.presentation.utils.ShowLog.tagTest
+import com.jinjer.simpleplayer.presentation.utils.extensions.playbackStateToString
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MainViewModel(
     app: SimplePlayerApp,
     private val getTracks: GetTracksUseCase,
     private val getCurrentTrackId: GetCurrentTrackIdUseCase,
+    private val getTrackById: GetTrackByIdUseCase,
     private val mapper: TrackMapper): AndroidViewModel(app), IClientCallback,
     IPlayerController {
 
+    private val tagMainViewModel = "tag_main_view_model"
     private val simpleName = MainViewModel::class.java.simpleName
     private val appContext = getApplication<SimplePlayerApp>().applicationContext
     private val mediaClientManager = MediaClientManager(appContext, this)
@@ -53,6 +59,7 @@ class MainViewModel(
     override val isTracksLoaded: LiveData<Boolean> = mIsTracksLoaded
 
     private var permissionWasGranted = false
+    private var currentQueueData = QueueData.buildAllTracksData()
 
     override fun onTokenReceived(token: MediaSessionCompat.Token) {
         mediaController = MediaControllerCompat(appContext, token)
@@ -72,7 +79,12 @@ class MainViewModel(
         mediaClientManager.stopService()
     }
 
-    override fun play(trackId: Int) {
+    override fun play(trackId: Int, playbackQueue: QueueData) {
+        if (checkQueueTheSame(playbackQueue).not()) {
+            updateQueue(playbackQueue)
+            currentQueueData = playbackQueue
+        }
+
         if (trackId == mCurrentTrack.value?.id) {
             resume()
             return
@@ -105,9 +117,7 @@ class MainViewModel(
         permissionWasGranted = true
 
         viewModelScope.launch {
-            tracks = withContext(Dispatchers.IO) {
-                mapper.fromList(getTracks())
-            }
+            tracks = mapper.fromList(getTracks())
 
             if (tracks.isNullOrEmpty().not()) {
                 mediaClientManager.startService()
@@ -163,28 +173,50 @@ class MainViewModel(
             super.onPlaybackStateChanged(playbackState)
 
             val playback = playbackState ?: return
-            val currentTrack: Track = playback.extras?.getParcelable(SpConstants.keyCurrentTrack) ?: return
+            val currentTrackId: Int = playback.extras?.getInt(SpConstants.keyCurrentTrack) ?: return
 
-            if (mCurrentTrack.value?.id != currentTrack.id) {
-                mCurrentTrack.value = currentTrack
-                mCurrentPosition.value = 0
+            if (mCurrentTrack.value?.id != currentTrackId) {
+                viewModelScope.launch {
+                    getTrackById(currentTrackId)?.let { trackDomain ->
+                        ShowLog.i("$simpleName.mediaControllerCallback.onPlaybackStateChanged,track changed to ${ trackDomain.id }", tagMainViewModel)
+
+                        mCurrentTrack.value = mapper.from(trackDomain)
+                        setPosition(0)
+                        setIsPlaying(playback.state)
+                    }
+                }
 
                 return
             }
 
-            val position = playback.position
-            if (mCurrentPosition.value != position) {
-                mCurrentPosition.value = position
-            }
-
-            val state = playbackState.state
-
-            if (state == PlaybackStateCompat.STATE_PLAYING || state == PlaybackStateCompat.STATE_PAUSED) {
-                val isPlaying = state == PlaybackStateCompat.STATE_PLAYING
-                if (mIsPlaying.value != isPlaying) {
-                    mIsPlaying.value = isPlaying
-                }
-            }
+            setPosition(playback.position)
+            setIsPlaying(playback.state)
         }
+    }
+
+    private fun updateQueue(queueData: QueueData) {
+        val bundle = Bundle()
+        bundle.putParcelable(PlayerNavigator.keyQueueData, queueData)
+
+        playerControls.sendCustomAction(MusicService.actionUpdateQueue, bundle)
+    }
+
+    private fun setIsPlaying(playbackState: Int) {
+        val isPlaying = playbackState == PlaybackStateCompat.STATE_PLAYING
+        if (mIsPlaying.value != isPlaying) {
+            ShowLog.i("$simpleName.setIsPlaying, isPlaying changed to $isPlaying", tagMainViewModel)
+            mIsPlaying.value = isPlaying
+        }
+    }
+
+    private fun setPosition(newPosition: Long) {
+        if (mCurrentPosition.value != newPosition) {
+            mCurrentPosition.value = newPosition
+        }
+    }
+
+    private fun checkQueueTheSame(newQueueData: QueueData): Boolean {
+        return newQueueData.type == currentQueueData.type &&
+                newQueueData.id == currentQueueData.id
     }
 }

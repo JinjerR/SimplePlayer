@@ -28,6 +28,6 @@ class SearchAlbumsFragment: SearchFragmentBase<SearchAlbumPresenter, SearchAlbum
     }
 
     private fun onItemClick(data: SearchAlbumPresenter) {
-
+        mainController?.showAlbumDetails(data.albumId)
     }
 }

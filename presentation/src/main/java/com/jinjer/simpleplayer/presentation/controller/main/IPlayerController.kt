@@ -1,10 +1,11 @@
 package com.jinjer.simpleplayer.presentation.controller.main
 
 import androidx.lifecycle.LiveData
+import com.jinjer.simpleplayer.presentation.controller.service.QueueData
 import com.jinjer.simpleplayer.presentation.models.Track
 
 interface IPlayerController {
-    fun play(trackId: Int)
+    fun play(trackId: Int, playbackQueue: QueueData)
 
     fun resume()
 

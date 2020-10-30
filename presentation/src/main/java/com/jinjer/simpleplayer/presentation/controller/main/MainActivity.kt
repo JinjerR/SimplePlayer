@@ -11,13 +11,14 @@ import com.jinjer.simpleplayer.presentation.R
 import com.jinjer.simpleplayer.presentation.base.BaseActivity
 import com.jinjer.simpleplayer.presentation.base.MainFragment
 import com.jinjer.simpleplayer.presentation.databinding.ActivityMainBinding
+import com.jinjer.simpleplayer.presentation.main.albums.AlbumDetailsFragment
 import com.jinjer.simpleplayer.presentation.utils.MessageUtils
 import com.jinjer.simpleplayer.presentation.utils.extensions.activityViewModel
 import com.jinjer.simpleplayer.presentation.utils.notifications.INotifyManager
 import org.kodein.di.direct
 import org.kodein.di.instance
 
-class MainActivity: BaseActivity() {
+class MainActivity: BaseActivity(), IMainController {
 
     private lateinit var binding: ActivityMainBinding
     private val mainViewModel: MainViewModel by activityViewModel()
@@ -25,7 +26,9 @@ class MainActivity: BaseActivity() {
     private val requestCodeReadPermission = 1
     private val simpleName = MainActivity::class.java.simpleName
     private var readPermissionGranted = false
+
     private val tagMainFragment = "tag_main_fragment"
+    private val tagAlbumDetails = "tag_album_details"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +56,15 @@ class MainActivity: BaseActivity() {
     }
 
     override fun onBackPressed() {
+        getAlbumDetailsFragment()?.let { albumDetailsFragment ->
+            if (albumDetailsFragment.backProcessed()) {
+                return
+            }
+
+            supportFragmentManager.popBackStack()
+            return
+        }
+
         if (getMainFragment().backProcessed()) {
             return
         }
@@ -84,14 +96,32 @@ class MainActivity: BaseActivity() {
         }
     }
 
+    override fun showAlbumDetails(albumId: Int) {
+        addAlbumDetails(albumId)
+    }
+
+    private fun addAlbumDetails(albumId: Int) {
+        supportFragmentManager
+            .beginTransaction()
+            .add(R.id.main_content, AlbumDetailsFragment.newInstance(albumId), tagAlbumDetails)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    private fun getAlbumDetailsFragment(): AlbumDetailsFragment? {
+        return supportFragmentManager
+            .findFragmentByTag(tagAlbumDetails) as? AlbumDetailsFragment
+    }
+
     private fun getMainFragment(): MainFragment {
-        return supportFragmentManager.findFragmentByTag(tagMainFragment) as MainFragment
+        return supportFragmentManager
+            .findFragmentByTag(tagMainFragment) as MainFragment
     }
 
     private fun addMainFragment() {
         supportFragmentManager
             .beginTransaction()
-            .add(R.id.main_fragment, MainFragment(), tagMainFragment)
+            .add(R.id.main_content, MainFragment(), tagMainFragment)
             .commit()
     }
 

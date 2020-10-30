@@ -1,6 +1,6 @@
 package com.jinjer.simpleplayer.presentation.utils.extensions
 
-fun Int.convertToPlaybackStateName():String {
+fun Int.playbackStateToString():String {
     return when(this) {
         0 -> "STATE_NONE"
         1 -> "STATE_STOPPED"
