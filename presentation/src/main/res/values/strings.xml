@@ -16,7 +16,8 @@
     <string name="tag_fragment_player">fragment_player</string>
 
     <!-- search -->
-    <string name="search_nothing_found">Nothing Found</string>
+    <string name="search_no_results">No Results</string>
+    <string name="search_no_matches">No Matches</string>
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

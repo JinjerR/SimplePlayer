@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.StringRes
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -51,9 +52,15 @@ abstract class SearchFragmentBase<P, VH: BaseViewHolder<P>>: BaseFragment(), IOn
             listenerOnCountChanged?.onItemCountChanged(searchResult.size, searchType)
 
             if (searchResult.isEmpty()) {
-                showNothingFound()
+                val msg = if (searchViewModel.query.isEmpty()) {
+                    R.string.search_no_results
+                } else {
+                    R.string.search_no_matches
+                }
+
+                showMessage(msg)
             } else {
-                hideNothingFound()
+                hideMessage()
             }
         }
     }
@@ -71,12 +78,13 @@ abstract class SearchFragmentBase<P, VH: BaseViewHolder<P>>: BaseFragment(), IOn
         }
     }
 
-    private fun showNothingFound() {
+    private fun showMessage(@StringRes msgResId: Int) {
         binding.imgNothingFound.visibility = View.VISIBLE
         binding.txtNothingFound.visibility = View.VISIBLE
+        binding.txtNothingFound.text = resources.getString(msgResId)
     }
 
-    private fun hideNothingFound() {
+    private fun hideMessage() {
         binding.imgNothingFound.visibility = View.INVISIBLE
         binding.txtNothingFound.visibility = View.INVISIBLE
     }

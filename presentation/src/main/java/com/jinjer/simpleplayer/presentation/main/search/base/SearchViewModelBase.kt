@@ -16,7 +16,7 @@ abstract class SearchViewModelBase<P>(
     private val mapper: Mapper<TrackDomain, P>): ViewModel() {
 
     private var dataSource: List<P> = emptyList()
-    protected var query = ""
+    var query = ""
 
     private val mSearchResult = MutableLiveData<List<P>>()
     val searchResult: LiveData<List<P>> = mSearchResult
@@ -29,6 +29,11 @@ abstract class SearchViewModelBase<P>(
 
     fun search(query: String) {
         this.query = query
+
+        if(query.isEmpty()) {
+            mSearchResult.value = emptyList()
+            return
+        }
 
         viewModelScope.launch {
             mSearchResult.value = withContext(Dispatchers.IO) {
