@@ -15,7 +15,7 @@ interface IPlayer {
 
     fun onAppEventHappened(event: AppEvent)
 
-    fun getCurrentlyPlayingTrackId(): Int
+    fun repeatCurrentTrack()
 
     val isPlaying: Boolean
 

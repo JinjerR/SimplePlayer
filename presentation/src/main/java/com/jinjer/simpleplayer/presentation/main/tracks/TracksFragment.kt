@@ -47,17 +47,14 @@ class TracksFragment : BaseFragment() {
     }
 
     private fun subscribeToFragmentViewModel() {
-        tracksViewModel.selectedTrackIdx.observe(viewLifecycleOwner) { trackIdx ->
-            tracksAdapter.setSelectedByIdx(trackIdx)
-        }
         tracksViewModel.tracks.observe(viewLifecycleOwner) { tracks ->
-            tracksAdapter.submitList(tracks)
+            tracksAdapter.submitList(tracks.toMutableList())
         }
     }
 
     private fun subscribeToMainViewModel() {
         mainViewModel.isPlaying.observe(viewLifecycleOwner) { isPlaying ->
-            tracksAdapter.setIsPlaying(isPlaying)
+            tracksAdapter.setPlaying(isPlaying)
         }
         mainViewModel.isTracksLoaded.observe(viewLifecycleOwner) { isTracksLoaded ->
             if (isTracksLoaded) {
@@ -66,7 +63,7 @@ class TracksFragment : BaseFragment() {
             }
         }
         mainViewModel.currentTrack.observe(viewLifecycleOwner) { track ->
-            tracksViewModel.onTrackChanged(track)
+            tracksAdapter.onTrackChanged(track.id)
         }
     }
 

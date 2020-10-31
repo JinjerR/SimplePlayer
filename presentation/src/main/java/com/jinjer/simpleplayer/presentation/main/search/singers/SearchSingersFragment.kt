@@ -9,7 +9,7 @@ import com.jinjer.simpleplayer.presentation.utils.extensions.fragmentViewModel
 
 class SearchSingersFragment: SearchFragmentBase<SearchSingerPresenter, SearchSingerViewHolder>() {
 
-    override val adapter = SearchSingerAdapter(::onItemClick)
+    override val searchAdapter = SearchSingerAdapter(::onItemClick)
 
     override val searchViewModel: SearchSingersViewModel by fragmentViewModel()
 

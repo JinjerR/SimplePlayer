@@ -43,10 +43,10 @@ abstract class SearchFragmentBase<P, VH: BaseViewHolder<P>>: BaseFragment(), IOn
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        subscribeToViewModel()
+        subscribeToMainViewModel()
 
         searchViewModel.searchResult.observe(viewLifecycleOwner) { searchResult ->
-            adapter.submitList(searchResult)
+            searchAdapter.submitList(searchResult)
 
             listenerOnCountChanged?.onItemCountChanged(searchResult.size, searchType)
 
@@ -63,7 +63,7 @@ abstract class SearchFragmentBase<P, VH: BaseViewHolder<P>>: BaseFragment(), IOn
     }
 
     private fun initRecycler() {
-        binding.recycler.adapter = adapter
+        binding.recycler.adapter = searchAdapter
         binding.recycler.layoutManager = getLayoutManager()
 
         getItemDecoration()?.let {
@@ -87,7 +87,7 @@ abstract class SearchFragmentBase<P, VH: BaseViewHolder<P>>: BaseFragment(), IOn
 
     open fun getItemDecoration(): RecyclerView.ItemDecoration? = null
 
-    open fun subscribeToViewModel() {
+    open fun subscribeToMainViewModel() {
         mainViewModel.isTracksLoaded.observe(viewLifecycleOwner) { loaded ->
             if (loaded) {
                 searchViewModel.onTracksLoaded()
@@ -95,7 +95,7 @@ abstract class SearchFragmentBase<P, VH: BaseViewHolder<P>>: BaseFragment(), IOn
         }
     }
 
-    abstract val adapter: BaseAdapter<P, VH>
+    abstract val searchAdapter: BaseAdapter<P, VH>
 
     abstract val searchViewModel: SearchViewModelBase<P>
 

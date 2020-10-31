@@ -8,8 +8,8 @@ class TrackPresenterMapper: Mapper<TrackDomain, TrackPresenter>() {
     override fun from(element: TrackDomain): TrackPresenter {
         return TrackPresenter(
             element.id,
-            element.artist ?: "",
-            element.title ?: ""
+            element.title ?: "",
+            element.artist ?: ""
         )
     }
 }

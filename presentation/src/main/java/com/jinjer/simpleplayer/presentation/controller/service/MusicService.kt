@@ -45,6 +45,7 @@ class MusicService: Service(),
 
     private var appInBackground = false
     private var clientMessenger: Messenger? = null
+    private var lockedSkippingTracks = false
 
     private val simpleName = MusicService::class.java.simpleName
     private val getTracks: GetTracksUseCase by instance()
@@ -106,6 +107,10 @@ class MusicService: Service(),
         }
 
         override fun onSkipToPrevious() {
+            if (lockedSkippingTracks) {
+                return
+            }
+
             ShowLog.i("$simpleName.mediaSessionCallback.onSkipToPrevious()", tagMusicControl)
 
             val previousTrackId = playerNavigator.previousTrack()?: return
@@ -143,6 +148,12 @@ class MusicService: Service(),
 
             if (action == actionUpdateQueue) {
                 extras?.getParcelable<QueueData>(PlayerNavigator.keyQueueData)?.let { queueData ->
+                    if (queueData.type == QueueType.SEARCH) {
+                        lockSkippingTracks()
+                    } else {
+                        unlockSkippingTracks()
+                    }
+
                     playerNavigator.setQueue(queueData)
                 }
             }
@@ -156,7 +167,7 @@ class MusicService: Service(),
 
         loadTracks()
         setupMediaSession()
-        player = Player(applicationContext, this)
+        player = Player(applicationContext, direct.instance(),this)
     }
 
     override fun onDestroy() {
@@ -285,6 +296,15 @@ class MusicService: Service(),
     }
 
     private fun skipToNext(afterCompletion: Boolean) {
+        if (lockedSkippingTracks) {
+            if (afterCompletion) {
+                playerNavigator.currentTrack()?.let {
+                    player.repeatCurrentTrack()
+                }
+            }
+            return
+        }
+
         val nextTrackId = playerNavigator.nextTrack()?: return
         if (player.isPlaying || afterCompletion) {
             player.play(nextTrackId)
@@ -346,6 +366,14 @@ class MusicService: Service(),
         } catch (e: RemoteException) {
             ShowLog.e("$simpleName.sendMessageToClient(), ${ e.printStackTrace() }")
         }
+    }
+
+    private fun lockSkippingTracks() {
+        lockedSkippingTracks = true
+    }
+
+    private fun unlockSkippingTracks() {
+        lockedSkippingTracks = false
     }
 
     class ServiceHandler(musicService: MusicService): Handler() {

@@ -9,21 +9,24 @@ import com.jinjer.simpleplayer.presentation.utils.extensions.fragmentViewModel
 
 class SearchTracksFragment: SearchFragmentBase<TrackPresenter, TrackViewHolder>() {
 
-    override val adapter = SearchTracksAdapter(::onItemClick)
+    override val searchAdapter = SearchTracksAdapter(::onItemClick)
 
     override val searchViewModel: SearchTracksViewModel by fragmentViewModel()
 
     override val searchType: SearchType = SearchType.TRACKS
 
-    override fun subscribeToViewModel() {
-        super.subscribeToViewModel()
+    override fun subscribeToMainViewModel() {
+        super.subscribeToMainViewModel()
 
         mainViewModel.isPlaying.observe(viewLifecycleOwner) { isPlaying ->
-            adapter.setIsPlaying(isPlaying)
+            searchAdapter.setPlaying(isPlaying)
+        }
+        mainViewModel.currentTrack.observe(viewLifecycleOwner) { track ->
+            searchAdapter.onTrackChanged(track.id)
         }
     }
 
     private fun onItemClick(track: TrackPresenter) {
-        mainViewModel.play(track.trackId, QueueData.buildAllTracksData())
+        mainViewModel.play(track.trackId, QueueData.buildSearchData())
     }
 }

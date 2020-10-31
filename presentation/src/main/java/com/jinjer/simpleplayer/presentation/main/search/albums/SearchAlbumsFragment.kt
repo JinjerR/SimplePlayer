@@ -11,7 +11,7 @@ import com.jinjer.simpleplayer.presentation.utils.extensions.fragmentViewModel
 
 class SearchAlbumsFragment: SearchFragmentBase<SearchAlbumPresenter, SearchAlbumsViewHolder>() {
 
-    override var adapter: SearchAlbumsAdapter =
+    override var searchAdapter: SearchAlbumsAdapter =
         SearchAlbumsAdapter(ItemAlbumType.VERTICAL, ::onItemClick)
 
     override val searchViewModel: SearchAlbumsViewModel by fragmentViewModel()

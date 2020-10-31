@@ -8,6 +8,7 @@ import android.media.MediaPlayer
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import com.jinjer.simpleplayer.domain.usecases.SetCurrentTrackIdUseCase
 import com.jinjer.simpleplayer.presentation.controller.service.AppEvent.*
 import com.jinjer.simpleplayer.presentation.controller.service.MusicService.Companion.tagMusicControl
 import com.jinjer.simpleplayer.presentation.controller.service.PlayerState.*
@@ -34,7 +35,11 @@ import com.jinjer.simpleplayer.presentation.utils.Utils
  *  6) After calling [MediaPlayer.release], the object can no longer be used
  **/
 
-class Player(private val context: Context, private val stateChangeListener: IPlayerStateChangeListener):
+class Player(
+    private val context: Context,
+    private val setCurrentTrackId: SetCurrentTrackIdUseCase,
+    private val stateChangeListener: IPlayerStateChangeListener):
+
     MediaPlayer.OnPreparedListener,
     MediaPlayer.OnErrorListener,
     MediaPlayer.OnCompletionListener,
@@ -85,8 +90,6 @@ class Player(private val context: Context, private val stateChangeListener: IPla
         }
     }
 
-    override fun getCurrentlyPlayingTrackId(): Int = currentTrackId
-
     override fun onAppEventHappened(event: AppEvent) {
         ShowLog.i("$simpleName.onAppEventHappened() event = $event", tagMusicControl)
 
@@ -102,6 +105,10 @@ class Player(private val context: Context, private val stateChangeListener: IPla
                 audioManager.abandonAudioFocus(this)
             }
         }
+    }
+
+    override fun repeatCurrentTrack() {
+        startInternal()
     }
 
     override fun prepareForPlaying(trackId: Int) {
@@ -183,6 +190,7 @@ class Player(private val context: Context, private val stateChangeListener: IPla
 
         val songUri = Utils.getSongUri(trackId.toLong())
         try {
+            setCurrentTrackId(trackId)
             mp.setDataSource(context, songUri)
             updatePlayerState(INITIALIZED)
         } catch (e: Exception) {
@@ -251,7 +259,7 @@ class Player(private val context: Context, private val stateChangeListener: IPla
         }
 
         when(playerState) {
-            PREPARED, PAUSED -> {
+            PREPARED, PAUSED, COMPLETED -> {
                 mp.start()
                 updatePlayerState(STARTED)
                 updatePositionBehavior()

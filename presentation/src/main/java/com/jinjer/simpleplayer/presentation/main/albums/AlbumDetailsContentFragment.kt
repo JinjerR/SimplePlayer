@@ -36,7 +36,7 @@ class AlbumDetailsContentFragment: BaseFragment() {
 
         albumDetailsViewModel.albumDetails.observe(viewLifecycleOwner) { albumDetails ->
             val trackIds = albumDetails.trackList.map { it.trackId }
-            val queueData = QueueData.buildAlbumQueue(albumDetails.id, trackIds)
+            val queueData = QueueData.buildAlbumData(albumDetails.id, trackIds)
 
             addTracksFragment(albumDetails.trackList, queueData)
             loadAlbumImage(albumDetails.id)

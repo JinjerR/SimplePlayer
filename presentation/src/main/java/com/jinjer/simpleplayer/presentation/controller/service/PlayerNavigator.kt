@@ -5,13 +5,15 @@ import com.jinjer.simpleplayer.presentation.controller.service.MusicService.Comp
 import com.jinjer.simpleplayer.presentation.controller.service.QueueType.*
 import com.jinjer.simpleplayer.presentation.utils.ShowLog
 import kotlinx.android.parcel.Parcelize
+import java.util.*
 import kotlin.collections.ArrayList
 
 enum class QueueType {
     ALL_TRACKS,
     @Suppress("unused")
     SINGER,
-    ALBUM
+    ALBUM,
+    SEARCH
 }
 
 @Parcelize
@@ -24,8 +26,11 @@ data class QueueData(
         fun buildAllTracksData(): QueueData {
             return QueueData(-1,  emptyList(), ALL_TRACKS)
         }
-        fun buildAlbumQueue(albumId: Int, trackIds: List<Int>): QueueData {
+        fun buildAlbumData(albumId: Int, trackIds: List<Int>): QueueData {
             return QueueData(albumId, trackIds, ALBUM)
+        }
+        fun buildSearchData(): QueueData {
+            return QueueData(-1, emptyList(), SEARCH)
         }
     }
 }
@@ -95,7 +100,7 @@ class PlayerNavigator(private val trackIds: List<Int>): IPlayerNavigator {
     private fun setQueueInternal(queueData: QueueData) {
         val currentTrackIdx = currentTrack()
 
-        val trackList = if (queueData.type == ALL_TRACKS)
+        val trackList = if (queueData.type == ALL_TRACKS || queueData.type == SEARCH)
             trackIds
         else
             queueData.trackIds
