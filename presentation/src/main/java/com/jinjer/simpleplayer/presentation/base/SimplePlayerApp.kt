@@ -3,7 +3,6 @@ package com.jinjer.simpleplayer.presentation.base
 import android.app.Application
 import android.content.Context
 import com.jinjer.simpleplayer.data.di.dataSourcesModule
-import com.jinjer.simpleplayer.domain.utils.DIConstants
 import com.jinjer.simpleplayer.domain.utils.DIConstants.tagApplication
 import com.jinjer.simpleplayer.presentation.R
 import com.jinjer.simpleplayer.presentation.di.mappersModule

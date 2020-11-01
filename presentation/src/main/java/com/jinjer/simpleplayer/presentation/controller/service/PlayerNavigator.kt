@@ -5,7 +5,6 @@ import com.jinjer.simpleplayer.presentation.controller.service.MusicService.Comp
 import com.jinjer.simpleplayer.presentation.controller.service.QueueType.*
 import com.jinjer.simpleplayer.presentation.utils.ShowLog
 import kotlinx.android.parcel.Parcelize
-import java.util.*
 import kotlin.collections.ArrayList
 
 enum class QueueType {

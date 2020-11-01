@@ -1,9 +1,7 @@
 package com.jinjer.simpleplayer.presentation.main.search.base
 
 import androidx.lifecycle.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 // TODO: first need to take the result from the data layer,
 //  and only then we run it through the mapper into our search result
