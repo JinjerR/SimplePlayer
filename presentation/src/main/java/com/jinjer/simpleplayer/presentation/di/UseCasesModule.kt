@@ -9,8 +9,15 @@ import org.kodein.di.provider
 
 val useCasesModule = Module(DIConstants.moduleUseCases) {
     bind<GetTracksUseCase>() with provider { GetTracksUseCase(instance()) }
+
     bind<GetCurrentTrackIdUseCase>() with provider { GetCurrentTrackIdUseCase(instance()) }
     bind<SetCurrentTrackIdUseCase>() with provider { SetCurrentTrackIdUseCase(instance()) }
-    bind<GetAlbumDetailsByIdUseCase>() with provider { GetAlbumDetailsByIdUseCase(instance()) }
+
     bind<GetTrackByIdUseCase>() with provider { GetTrackByIdUseCase(instance()) }
+    bind<GetAlbumByIdUseCase>() with provider { GetAlbumByIdUseCase(instance()) }
+    bind<GetSingerByIdUseCase>() with provider { GetSingerByIdUseCase(instance()) }
+
+    bind<SearchAlbumByTitleUseCase>() with provider { SearchAlbumByTitleUseCase(instance()) }
+    bind<SearchSingerByNameUseCase>() with provider { SearchSingerByNameUseCase(instance()) }
+    bind<SearchTrackByTitleUseCase>() with provider { SearchTrackByTitleUseCase(instance()) }
 }

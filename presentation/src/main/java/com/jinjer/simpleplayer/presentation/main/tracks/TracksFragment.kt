@@ -12,6 +12,7 @@ import com.jinjer.simpleplayer.presentation.controller.service.PlayerNavigator
 import com.jinjer.simpleplayer.presentation.controller.service.QueueData
 import com.jinjer.simpleplayer.presentation.databinding.FragmentTracksBinding
 import com.jinjer.simpleplayer.presentation.main.tracks.recycler_view.TracksAdapter
+import com.jinjer.simpleplayer.presentation.models.track.Track
 import com.jinjer.simpleplayer.presentation.utils.extensions.fragmentViewModel
 
 class TracksFragment : BaseFragment() {
@@ -58,7 +59,7 @@ class TracksFragment : BaseFragment() {
         }
         mainViewModel.isTracksLoaded.observe(viewLifecycleOwner) { isTracksLoaded ->
             if (isTracksLoaded) {
-                val tracks: List<TrackPresenter>? = arguments?.getParcelableArrayList(keyTracks)
+                val tracks: List<Track>? = arguments?.getParcelableArrayList(keyTracks)
                 tracksViewModel.onTracksLoaded(tracks)
             }
         }
@@ -74,14 +75,14 @@ class TracksFragment : BaseFragment() {
         }
     }
 
-    private fun onTrackClicked(track: TrackPresenter) {
+    private fun onTrackClicked(track: Track) {
         mainViewModel.play(track.trackId, queueData ?: QueueData.buildAllTracksData())
     }
 
     companion object {
         const val keyTracks = "key_tracks"
 
-        fun newInstance(tracks: List<TrackPresenter>? = null, queueData: QueueData): TracksFragment = TracksFragment().apply {
+        fun newInstance(tracks: List<Track>? = null, queueData: QueueData): TracksFragment = TracksFragment().apply {
             arguments = Bundle().apply {
                 tracks?.let { putParcelableArrayList(keyTracks, ArrayList(it)) }
                 putParcelable(PlayerNavigator.keyQueueData, queueData)

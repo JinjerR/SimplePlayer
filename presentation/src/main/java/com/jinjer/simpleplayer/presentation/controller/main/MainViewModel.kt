@@ -19,24 +19,22 @@ import com.jinjer.simpleplayer.presentation.controller.service.MusicService
 import com.jinjer.simpleplayer.presentation.controller.service.MusicService.Companion.tagMusicControl
 import com.jinjer.simpleplayer.presentation.controller.service.PlayerNavigator
 import com.jinjer.simpleplayer.presentation.controller.service.QueueData
-import com.jinjer.simpleplayer.presentation.models.Track
-import com.jinjer.simpleplayer.presentation.models.mappers.TrackMapper
+import com.jinjer.simpleplayer.presentation.models.track.TrackData
+import com.jinjer.simpleplayer.presentation.models.track.TrackDataMapper
 import com.jinjer.simpleplayer.presentation.utils.ShowLog
 import kotlinx.coroutines.launch
 
 class MainViewModel(
     app: SimplePlayerApp,
     private val getTracks: GetTracksUseCase,
-    private val getCurrentTrackId: GetCurrentTrackIdUseCase,
     private val getTrackById: GetTrackByIdUseCase,
-    private val mapper: TrackMapper): AndroidViewModel(app), IClientCallback,
-    IPlayerController {
+    private val getCurrentTrackId: GetCurrentTrackIdUseCase,
+    private val mapper: TrackDataMapper): AndroidViewModel(app), IClientCallback, IPlayerController {
 
     private val tagMainViewModel = "tag_main_view_model"
     private val simpleName = MainViewModel::class.java.simpleName
     private val appContext = getApplication<SimplePlayerApp>().applicationContext
     private val mediaClientManager = MediaClientManager(appContext, this)
-    private var tracks: List<Track>? = null
 
     private var mediaController: MediaControllerCompat? = null
     private var mediaControllerWasRegistered = false
@@ -44,8 +42,8 @@ class MainViewModel(
     private val playerControls: MediaControllerCompat.TransportControls
     get() = mediaController!!.transportControls
 
-    private val mCurrentTrack = MutableLiveData( Track.emptyTrack() )
-    override val currentTrack: LiveData<Track> = mCurrentTrack
+    private val mCurrentTrack = MutableLiveData( TrackData.emptyTrack() )
+    override val currentTrack: LiveData<TrackData> = mCurrentTrack
 
     private val mCurrentPosition = MutableLiveData(0L)
     override val currentPosition: LiveData<Long> = mCurrentPosition
@@ -58,13 +56,14 @@ class MainViewModel(
 
     private var permissionWasGranted = false
     private var currentQueueData = QueueData.buildAllTracksData()
+    private var firstTrackId: Int? = null
 
     override fun onTokenReceived(token: MediaSessionCompat.Token) {
         mediaController = MediaControllerCompat(appContext, token)
         registerMediaController()
 
         getCurrentTrackId().let { id ->
-            val trackId = if (id == -1) tracks?.firstOrNull()?.id else id
+            val trackId = if (id == -1) firstTrackId else id
             trackId?.let {
                 playerControls.prepareFromMediaId(it.toString(), null)
             }
@@ -115,13 +114,13 @@ class MainViewModel(
         permissionWasGranted = true
 
         viewModelScope.launch {
-            tracks = mapper.fromList(getTracks())
-
-            if (tracks.isNullOrEmpty().not()) {
-                mediaClientManager.startService()
-                mediaClientManager.bind()
-                mIsTracksLoaded.value = true
+            getTracks()?.let {
+                firstTrackId = it.firstOrNull()?.id
             }
+
+            mediaClientManager.startService()
+            mediaClientManager.bind()
+            mIsTracksLoaded.value = true
         }
     }
 
@@ -176,8 +175,6 @@ class MainViewModel(
             if (mCurrentTrack.value?.id != currentTrackId) {
                 viewModelScope.launch {
                     getTrackById(currentTrackId)?.let { trackDomain ->
-                        ShowLog.i("$simpleName.mediaControllerCallback.onPlaybackStateChanged,track changed to ${ trackDomain.id }", tagMainViewModel)
-
                         mCurrentTrack.value = mapper.from(trackDomain)
                         setPosition(0)
                         setIsPlaying(playback.state)

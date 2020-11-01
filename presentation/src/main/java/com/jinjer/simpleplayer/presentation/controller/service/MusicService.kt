@@ -15,9 +15,8 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.jinjer.simpleplayer.domain.usecases.GetTrackByIdUseCase
 import com.jinjer.simpleplayer.domain.usecases.GetTracksUseCase
-import com.jinjer.simpleplayer.domain.usecases.SetCurrentTrackIdUseCase
 import com.jinjer.simpleplayer.presentation.R
-import com.jinjer.simpleplayer.presentation.models.mappers.TrackMapper
+import com.jinjer.simpleplayer.presentation.models.track.TrackDataMapper
 import com.jinjer.simpleplayer.presentation.utils.SpConstants.keyCurrentTrack
 import com.jinjer.simpleplayer.presentation.utils.ShowLog
 import kotlinx.coroutines.CoroutineScope
@@ -25,7 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.jinjer.simpleplayer.presentation.controller.service.AppEvent.*
 import com.jinjer.simpleplayer.presentation.controller.service.PlayerState.*
-import com.jinjer.simpleplayer.presentation.models.Track
+import com.jinjer.simpleplayer.presentation.models.track.TrackData
 import com.jinjer.simpleplayer.presentation.utils.Utils
 import com.jinjer.simpleplayer.presentation.utils.notifications.INotifyManager
 import com.jinjer.simpleplayer.presentation.utils.notifications.NotificationInfo
@@ -50,7 +49,7 @@ class MusicService: Service(),
     private val simpleName = MusicService::class.java.simpleName
     private val getTracks: GetTracksUseCase by instance()
     private val getTrackById: GetTrackByIdUseCase by instance()
-    private val setCurrentTrack: SetCurrentTrackIdUseCase by instance()
+    private val trackMapper: TrackDataMapper by instance()
     private val notifyManager: INotifyManager by instance()
     private val serviceScope = CoroutineScope(Dispatchers.Main)
     private val mMessenger = Messenger(ServiceHandler(this))
@@ -228,7 +227,6 @@ class MusicService: Service(),
                 currentPlaybackData.putInt(keyCurrentTrack, currentTrackId)
 
                 val newPosition = if (playerState == PREPARED) {
-                    setCurrentTrack(currentTrackId)
                     0L
                 } else {
                     currentPosition
@@ -257,7 +255,7 @@ class MusicService: Service(),
 
         serviceScope.launch {
             val trackId = playerNavigator.currentTrack() ?: return@launch
-            val currentTrack = getTrackById(trackId)?.let { TrackMapper().from(it) } ?: return@launch
+            val currentTrack = getTrackById(trackId)?.let { trackMapper.from(it) } ?: return@launch
             val notifyInfo = buildNotificationInfo(currentTrack)
 
             if (startForeground) {
@@ -268,7 +266,7 @@ class MusicService: Service(),
         }
     }
 
-    private suspend fun buildNotificationInfo(track: Track): NotificationInfo = withContext(Dispatchers.Default) {
+    private suspend fun buildNotificationInfo(track: TrackData): NotificationInfo = withContext(Dispatchers.Default) {
         fun loadNotificationThumbnail(uri: Uri): Bitmap? {
             return try {
                 Glide.with(applicationContext)
@@ -315,7 +313,7 @@ class MusicService: Service(),
 
     private fun loadTracks() {
         serviceScope.launch {
-            val trackIds = getTracks().map { it.id }
+            val trackIds = getTracks()?.map { it.id } ?: emptyList()
             playerNavigator = PlayerNavigator(trackIds)
 
             ShowLog.i("$simpleName.loadTracks() ${trackIds.size} tracks loaded", tagMusicControl)

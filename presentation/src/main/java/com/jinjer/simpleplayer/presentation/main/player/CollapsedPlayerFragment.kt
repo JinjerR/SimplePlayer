@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import com.jinjer.simpleplayer.presentation.R
 import com.jinjer.simpleplayer.presentation.databinding.FragmentCollapsedPlayerBinding
-import com.jinjer.simpleplayer.presentation.models.Track
+import com.jinjer.simpleplayer.presentation.models.track.TrackData
 
 class CollapsedPlayerFragment: NowPlayingFragmentBase() {
     private lateinit var binding: FragmentCollapsedPlayerBinding
@@ -29,7 +29,7 @@ class CollapsedPlayerFragment: NowPlayingFragmentBase() {
         binding.imgPlay.setOnClickListener(::onPlayPauseClicked)
     }
 
-    override fun onTrackChanged(track: Track) {
+    override fun onTrackChanged(track: TrackData) {
         binding.trackName.text = track.title
         binding.bandName.text = track.artist
     }

@@ -4,10 +4,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.jinjer.simpleplayer.presentation.R
 import com.jinjer.simpleplayer.presentation.main.search.SearchType
 import com.jinjer.simpleplayer.presentation.main.search.base.SearchFragmentBase
+import com.jinjer.simpleplayer.presentation.models.singer.Singer
 import com.jinjer.simpleplayer.presentation.utils.custom_components.RecyclerItemDecoration
 import com.jinjer.simpleplayer.presentation.utils.extensions.fragmentViewModel
 
-class SearchSingersFragment: SearchFragmentBase<SearchSingerPresenter, SearchSingerViewHolder>() {
+class SearchSingersFragment: SearchFragmentBase<Singer, SearchSingerViewHolder>() {
 
     override val searchAdapter = SearchSingerAdapter(::onItemClick)
 
@@ -20,7 +21,7 @@ class SearchSingersFragment: SearchFragmentBase<SearchSingerPresenter, SearchSin
         return RecyclerItemDecoration(verticalSpace.toInt())
     }
 
-    private fun onItemClick(data: SearchSingerPresenter) {
+    private fun onItemClick(data: Singer) {
 
     }
 }

@@ -1,6 +1,16 @@
 package com.jinjer.simpleplayer.presentation.main.singers
 
-import com.jinjer.simpleplayer.presentation.base.BaseFragment
+import androidx.fragment.app.Fragment
+import com.jinjer.simpleplayer.presentation.main.player.PlayerFragmentWithContent
 
-@Suppress("unused")
-class SingerDetailsFragment: BaseFragment()
+class SingerDetailsFragment: PlayerFragmentWithContent() {
+
+    override fun getContentFragment(): Fragment {
+        val singerId = arguments?.getInt(keySingerId, -1) ?: -1
+        return SingerDetailsContentFragment.newInstance(singerId)
+    }
+
+    companion object {
+        const val keySingerId = "key_singer_id"
+    }
+}

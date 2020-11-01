@@ -3,13 +3,14 @@ package com.jinjer.simpleplayer.presentation.main.search.albums
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.jinjer.simpleplayer.presentation.R
+import com.jinjer.simpleplayer.presentation.models.album.Album
 import com.jinjer.simpleplayer.presentation.main.search.ItemAlbumType
 import com.jinjer.simpleplayer.presentation.main.search.SearchType
 import com.jinjer.simpleplayer.presentation.main.search.base.SearchFragmentBase
 import com.jinjer.simpleplayer.presentation.utils.custom_components.RecyclerItemDecoration
 import com.jinjer.simpleplayer.presentation.utils.extensions.fragmentViewModel
 
-class SearchAlbumsFragment: SearchFragmentBase<SearchAlbumPresenter, SearchAlbumsViewHolder>() {
+class SearchAlbumsFragment: SearchFragmentBase<Album, SearchAlbumsViewHolder>() {
 
     override var searchAdapter: SearchAlbumsAdapter =
         SearchAlbumsAdapter(ItemAlbumType.VERTICAL, ::onItemClick)
@@ -27,7 +28,7 @@ class SearchAlbumsFragment: SearchFragmentBase<SearchAlbumPresenter, SearchAlbum
         return RecyclerItemDecoration(spaceVertical.toInt(), spaceHorizontal.toInt())
     }
 
-    private fun onItemClick(data: SearchAlbumPresenter) {
+    private fun onItemClick(data: Album) {
         mainController?.showAlbumDetails(data.albumId)
     }
 }

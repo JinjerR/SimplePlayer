@@ -11,7 +11,7 @@ import com.jinjer.simpleplayer.presentation.base.BaseFragment
 import com.jinjer.simpleplayer.presentation.controller.service.QueueData
 import com.jinjer.simpleplayer.presentation.databinding.FragmentAlbumDetailsBinding
 import com.jinjer.simpleplayer.presentation.main.albums.AlbumDetailsFragment.Companion.keyAlbumId
-import com.jinjer.simpleplayer.presentation.main.tracks.TrackPresenter
+import com.jinjer.simpleplayer.presentation.models.track.Track
 import com.jinjer.simpleplayer.presentation.main.tracks.TracksFragment
 import com.jinjer.simpleplayer.presentation.utils.Utils
 import com.jinjer.simpleplayer.presentation.utils.extensions.fragmentViewModel
@@ -47,7 +47,7 @@ class AlbumDetailsContentFragment: BaseFragment() {
         albumDetailsViewModel.getAlbumDetails(albumId)
     }
 
-    private fun addTracksFragment(tracks: List<TrackPresenter>, queueData: QueueData) {
+    private fun addTracksFragment(tracks: List<Track>, queueData: QueueData) {
         val tracksFragment = TracksFragment.newInstance(tracks, queueData)
 
         childFragmentManager

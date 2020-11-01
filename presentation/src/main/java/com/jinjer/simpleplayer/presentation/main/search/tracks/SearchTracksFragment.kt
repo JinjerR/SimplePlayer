@@ -4,10 +4,10 @@ import com.jinjer.simpleplayer.presentation.controller.service.QueueData
 import com.jinjer.simpleplayer.presentation.main.search.SearchType
 import com.jinjer.simpleplayer.presentation.main.search.base.SearchFragmentBase
 import com.jinjer.simpleplayer.presentation.main.tracks.recycler_view.TrackViewHolder
-import com.jinjer.simpleplayer.presentation.main.tracks.TrackPresenter
+import com.jinjer.simpleplayer.presentation.models.track.Track
 import com.jinjer.simpleplayer.presentation.utils.extensions.fragmentViewModel
 
-class SearchTracksFragment: SearchFragmentBase<TrackPresenter, TrackViewHolder>() {
+class SearchTracksFragment: SearchFragmentBase<Track, TrackViewHolder>() {
 
     override val searchAdapter = SearchTracksAdapter(::onItemClick)
 
@@ -26,7 +26,7 @@ class SearchTracksFragment: SearchFragmentBase<TrackPresenter, TrackViewHolder>(
         }
     }
 
-    private fun onItemClick(track: TrackPresenter) {
+    private fun onItemClick(track: Track) {
         mainViewModel.play(track.trackId, QueueData.buildSearchData())
     }
 }

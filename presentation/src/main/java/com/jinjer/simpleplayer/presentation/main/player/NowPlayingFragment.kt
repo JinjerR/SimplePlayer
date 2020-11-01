@@ -13,7 +13,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.jinjer.simpleplayer.presentation.R
 import com.jinjer.simpleplayer.presentation.bottom_sheet.IBottomSheetParent
 import com.jinjer.simpleplayer.presentation.databinding.FragmentPlayerBinding
-import com.jinjer.simpleplayer.presentation.models.Track
+import com.jinjer.simpleplayer.presentation.models.track.TrackData
 import com.jinjer.simpleplayer.presentation.utils.TimeUtils
 import com.jinjer.simpleplayer.presentation.utils.Utils
 import com.jinjer.simpleplayer.presentation.utils.extensions.roundUpTwoDecimalPlaces
@@ -77,7 +77,7 @@ class NowPlayingFragment: NowPlayingFragmentBase(), SeekBar.OnSeekBarChangeListe
         mainViewModel.seekTo(seekBar?.progress ?: 0)
     }
 
-    override fun onTrackChanged(track: Track) {
+    override fun onTrackChanged(track: TrackData) {
         if (track.albumId != -1) {
             val albumArt = Utils.getAlbumArtUri(track.albumId.toLong())
             loadAlbumArt(albumArt)

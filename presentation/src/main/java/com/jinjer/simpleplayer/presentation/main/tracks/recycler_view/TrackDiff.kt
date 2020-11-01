@@ -1,19 +1,19 @@
 package com.jinjer.simpleplayer.presentation.main.tracks.recycler_view
 
 import androidx.recyclerview.widget.DiffUtil
-import com.jinjer.simpleplayer.presentation.main.tracks.TrackPresenter
+import com.jinjer.simpleplayer.presentation.models.track.Track
 
-class TrackDiff: DiffUtil.ItemCallback<TrackPresenter>() {
+class TrackDiff: DiffUtil.ItemCallback<Track>() {
     override fun areContentsTheSame(
-        oldItem: TrackPresenter,
-        newItem: TrackPresenter
+        oldItem: Track,
+        newItem: Track
     ): Boolean {
         return oldItem == newItem
     }
 
     override fun areItemsTheSame(
-        oldItem: TrackPresenter,
-        newItem: TrackPresenter
+        oldItem: Track,
+        newItem: Track
     ): Boolean {
         return oldItem.trackId == newItem.trackId
     }

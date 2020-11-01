@@ -5,7 +5,7 @@ import android.view.View
 import androidx.annotation.DrawableRes
 import com.jinjer.simpleplayer.presentation.R
 import com.jinjer.simpleplayer.presentation.base.BaseFragment
-import com.jinjer.simpleplayer.presentation.models.Track
+import com.jinjer.simpleplayer.presentation.models.track.TrackData
 
 abstract class NowPlayingFragmentBase: BaseFragment() {
 
@@ -31,7 +31,7 @@ abstract class NowPlayingFragmentBase: BaseFragment() {
         }
     }
 
-    abstract fun onTrackChanged(track: Track)
+    abstract fun onTrackChanged(track: TrackData)
 
     abstract fun onPlayIconChanged(@DrawableRes resId: Int)
 }

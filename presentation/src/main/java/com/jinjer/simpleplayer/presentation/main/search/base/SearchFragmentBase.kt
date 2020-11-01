@@ -95,13 +95,7 @@ abstract class SearchFragmentBase<P, VH: BaseViewHolder<P>>: BaseFragment(), IOn
 
     open fun getItemDecoration(): RecyclerView.ItemDecoration? = null
 
-    open fun subscribeToMainViewModel() {
-        mainViewModel.isTracksLoaded.observe(viewLifecycleOwner) { loaded ->
-            if (loaded) {
-                searchViewModel.onTracksLoaded()
-            }
-        }
-    }
+    open fun subscribeToMainViewModel() { }
 
     abstract val searchAdapter: BaseAdapter<P, VH>
 

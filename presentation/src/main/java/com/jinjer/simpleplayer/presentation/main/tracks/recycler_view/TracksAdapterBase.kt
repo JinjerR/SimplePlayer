@@ -2,12 +2,12 @@ package com.jinjer.simpleplayer.presentation.main.tracks.recycler_view
 
 import android.view.View
 import com.jinjer.simpleplayer.presentation.R
-import com.jinjer.simpleplayer.presentation.main.tracks.TrackPresenter
+import com.jinjer.simpleplayer.presentation.models.track.Track
 import com.jinjer.simpleplayer.presentation.utils.recyclerview.BaseAdapter
 
 abstract class TracksAdapterBase(
-    itemClick: (TrackPresenter) -> Unit
-): BaseAdapter<TrackPresenter, TrackViewHolder>(TrackDiff(), itemClick) {
+    itemClick: (Track) -> Unit
+): BaseAdapter<Track, TrackViewHolder>(TrackDiff(), itemClick) {
 
     private var currentTrackId = -1
     private var currentPosition = -1
@@ -17,12 +17,12 @@ abstract class TracksAdapterBase(
 
     override fun initHolder(view: View) = TrackViewHolder(view)
 
-    override fun onItemClick(data: TrackPresenter, position: Int) {
+    override fun onItemClick(data: Track, position: Int) {
         selectTrackAt(position)
         super.onItemClick(data, position)
     }
 
-    override fun submitList(list: List<TrackPresenter>?) {
+    override fun submitList(list: List<Track>?) {
         val idx = list?.indexOfFirst { it.trackId == currentTrackId } ?: -1
 
         currentPosition = if (idx == -1) {

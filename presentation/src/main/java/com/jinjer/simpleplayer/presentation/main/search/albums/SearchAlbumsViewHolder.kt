@@ -6,13 +6,14 @@ import androidx.appcompat.widget.AppCompatTextView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.jinjer.simpleplayer.presentation.R
+import com.jinjer.simpleplayer.presentation.models.album.Album
 import com.jinjer.simpleplayer.presentation.utils.recyclerview.BaseViewHolder
 
-class SearchAlbumsViewHolder(view: View): BaseViewHolder<SearchAlbumPresenter>(view) {
+class SearchAlbumsViewHolder(view: View): BaseViewHolder<Album>(view) {
     private val imgAlbum: AppCompatImageView = view.findViewById(R.id.img_album)
     private val albumName: AppCompatTextView = view.findViewById(R.id.name)
 
-    override fun bind(data: SearchAlbumPresenter) {
+    override fun bind(data: Album) {
         val requestOptions = RequestOptions()
             .error(R.drawable.icon_empty_album_art_round)
             .placeholder(R.drawable.icon_empty_album_art_round)

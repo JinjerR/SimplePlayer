@@ -1,10 +1,10 @@
-package com.jinjer.simpleplayer.presentation.models
+package com.jinjer.simpleplayer.presentation.models.track
 
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class Track (
+data class TrackData (
     val id: Int,
     val title: String,
     val artist: String,
@@ -14,8 +14,8 @@ data class Track (
     val duration: Long
 ): Parcelable {
     companion object {
-        fun emptyTrack(): Track {
-            return Track(-1, "", "", -1, "", -1, -1L)
+        fun emptyTrack(): TrackData {
+            return TrackData(-1, "", "", -1, "", -1, -1L)
         }
     }
 }
