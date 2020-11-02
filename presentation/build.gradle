@@ -3,7 +3,18 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: "kotlin-kapt"
 
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'
+
 android {
+    signingConfigs {
+        release_config {
+            storeFile file('D:\\Android\\AndroidStudioProjects\\key_store_simple_player\\keystore.jks')
+            storePassword 'Q{NPLtAv!PFM8<M]'
+            keyAlias 'simple_player'
+            keyPassword '%6,R2s]`fdF\'=?^b'
+        }
+    }
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
@@ -14,12 +25,17 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner rootProject.ext.testInstrumentationRunner
+        signingConfig signingConfigs.release_config
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            debuggable true
+            ext.enableCrashlytics = false
         }
     }
 
@@ -53,6 +69,9 @@ dependencies {
 
     implementation "com.github.bumptech.glide:glide:$glideVersion"
     kapt 'com.github.bumptech.glide:compiler:4.11.0'
+
+    implementation platform('com.google.firebase:firebase-bom:26.0.0')
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
 
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9'
     implementation 'com.google.android.material:material:1.2.1'

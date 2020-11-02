@@ -8,6 +8,8 @@ import android.media.MediaPlayer
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import com.jinjer.simpleplayer.domain.usecases.SetCurrentTrackIdUseCase
 import com.jinjer.simpleplayer.presentation.controller.service.AppEvent.*
 import com.jinjer.simpleplayer.presentation.controller.service.MusicService.Companion.tagMusicControl
@@ -164,9 +166,8 @@ class Player(
 
         updatePlayerState(ERROR)
 
-        // TODO: firebase
         val mediaPlayerException = MediaPlayerException(what, extra, playerState)
-//        Firebase Crash analytics.getInstance().recordException(mediaPlayerException)
+        Firebase.crashlytics.recordException(mediaPlayerException)
 
         resetInternal()
 

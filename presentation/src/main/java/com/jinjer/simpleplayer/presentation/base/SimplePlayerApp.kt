@@ -2,8 +2,10 @@ package com.jinjer.simpleplayer.presentation.base
 
 import android.app.Application
 import android.content.Context
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.jinjer.simpleplayer.data.di.dataSourcesModule
 import com.jinjer.simpleplayer.domain.utils.DIConstants.tagApplication
+import com.jinjer.simpleplayer.presentation.BuildConfig
 import com.jinjer.simpleplayer.presentation.R
 import com.jinjer.simpleplayer.presentation.di.mappersModule
 import com.jinjer.simpleplayer.presentation.di.useCasesModule
@@ -22,5 +24,12 @@ class SimplePlayerApp: Application(), DIAware {
         bind<SimplePlayerApp>(tagApplication) with singleton { this@SimplePlayerApp }
 
         constant("appName") with getString(R.string.app_name)
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+
+        val crashReportEnable = BuildConfig.DEBUG.not()
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(crashReportEnable)
     }
 }
