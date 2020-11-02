@@ -12,6 +12,7 @@ import com.jinjer.simpleplayer.presentation.bottom_sheet.IBottomSheetParent
  **/
 abstract class PlayerFragmentBase: BaseFragment(), IBottomSheetParent, IOnBackPressed {
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
+    private val tagPlayer = "tag_player"
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -31,12 +32,14 @@ abstract class PlayerFragmentBase: BaseFragment(), IBottomSheetParent, IOnBackPr
     }
 
     private fun addPlayer() {
-        val fragment = NowPlayingFragment()
+        childFragmentManager.findFragmentByTag(tagPlayer) ?: run {
+            val fragment = NowPlayingFragment()
 
-        childFragmentManager
-            .beginTransaction()
-            .add(idFragmentPlayer, fragment, null)
-            .commit()
+            childFragmentManager
+                .beginTransaction()
+                .replace(idFragmentPlayer, fragment, tagPlayer)
+                .commit()
+        }
     }
 
     override fun backProcessed(): Boolean {

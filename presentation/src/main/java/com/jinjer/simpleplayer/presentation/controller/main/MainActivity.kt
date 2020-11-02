@@ -12,6 +12,8 @@ import com.jinjer.simpleplayer.presentation.base.BaseActivity
 import com.jinjer.simpleplayer.presentation.base.MainFragment
 import com.jinjer.simpleplayer.presentation.databinding.ActivityMainBinding
 import com.jinjer.simpleplayer.presentation.main.albums.AlbumDetailsFragment
+import com.jinjer.simpleplayer.presentation.main.singers.SingerDetailsFragment
+import com.jinjer.simpleplayer.presentation.models.singer.SingerDetails
 import com.jinjer.simpleplayer.presentation.utils.MessageUtils
 import com.jinjer.simpleplayer.presentation.utils.extensions.activityViewModel
 import com.jinjer.simpleplayer.presentation.utils.notifications.INotifyManager
@@ -32,6 +34,19 @@ class MainActivity: BaseActivity(), IMainController {
 
     private val tagMainFragment = "tag_main_fragment"
     private val tagAlbumDetails = "tag_album_details"
+    private val tagSingerDetails = "tag_singer_details"
+
+    private val mainFragment: MainFragment?
+    get() = supportFragmentManager
+        .findFragmentByTag(tagMainFragment) as? MainFragment
+
+    private val albumDetailsFragment: AlbumDetailsFragment?
+    get() = supportFragmentManager
+        .findFragmentByTag(tagAlbumDetails) as? AlbumDetailsFragment
+
+    private val singerDetailsFragment: SingerDetailsFragment?
+    get() = supportFragmentManager
+        .findFragmentByTag(tagSingerDetails) as? SingerDetailsFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,8 +74,8 @@ class MainActivity: BaseActivity(), IMainController {
     }
 
     override fun onBackPressed() {
-        getAlbumDetailsFragment()?.let { albumDetailsFragment ->
-            if (albumDetailsFragment.backProcessed()) {
+        albumDetailsFragment?.let { fragment ->
+            if (fragment.backProcessed()) {
                 return
             }
 
@@ -68,7 +83,16 @@ class MainActivity: BaseActivity(), IMainController {
             return
         }
 
-        if (getMainFragment().backProcessed()) {
+        singerDetailsFragment?.let { fragment ->
+            if (fragment.backProcessed()) {
+                return
+            }
+
+            supportFragmentManager.popBackStack()
+            return
+        }
+
+        if (mainFragment?.backProcessed() == true) {
             return
         }
 
@@ -100,10 +124,6 @@ class MainActivity: BaseActivity(), IMainController {
     }
 
     override fun showAlbumDetails(albumId: Int) {
-        addAlbumDetails(albumId)
-    }
-
-    private fun addAlbumDetails(albumId: Int) {
         supportFragmentManager
             .beginTransaction()
             .add(R.id.main_content, AlbumDetailsFragment.newInstance(albumId), tagAlbumDetails)
@@ -111,21 +131,21 @@ class MainActivity: BaseActivity(), IMainController {
             .commit()
     }
 
-    private fun getAlbumDetailsFragment(): AlbumDetailsFragment? {
-        return supportFragmentManager
-            .findFragmentByTag(tagAlbumDetails) as? AlbumDetailsFragment
-    }
-
-    private fun getMainFragment(): MainFragment {
-        return supportFragmentManager
-            .findFragmentByTag(tagMainFragment) as MainFragment
+    override fun showSingerDetails(singerId: Int) {
+        supportFragmentManager
+            .beginTransaction()
+            .add(R.id.main_content, SingerDetailsFragment.newInstance(singerId), tagSingerDetails)
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun addMainFragment() {
-        supportFragmentManager
-            .beginTransaction()
-            .add(R.id.main_content, MainFragment(), tagMainFragment)
-            .commit()
+        mainFragment ?: run {
+            supportFragmentManager
+                .beginTransaction()
+                .add(R.id.main_content, MainFragment(), tagMainFragment)
+                .commit()
+        }
     }
 
     private fun setupNotifications() {

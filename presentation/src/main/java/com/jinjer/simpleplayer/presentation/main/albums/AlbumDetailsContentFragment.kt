@@ -11,7 +11,6 @@ import com.jinjer.simpleplayer.presentation.base.BaseFragment
 import com.jinjer.simpleplayer.presentation.controller.service.QueueData
 import com.jinjer.simpleplayer.presentation.databinding.FragmentAlbumDetailsBinding
 import com.jinjer.simpleplayer.presentation.main.albums.AlbumDetailsFragment.Companion.keyAlbumId
-import com.jinjer.simpleplayer.presentation.models.track.Track
 import com.jinjer.simpleplayer.presentation.main.tracks.TracksFragment
 import com.jinjer.simpleplayer.presentation.utils.Utils
 import com.jinjer.simpleplayer.presentation.utils.extensions.fragmentViewModel
@@ -19,6 +18,8 @@ import com.jinjer.simpleplayer.presentation.utils.extensions.fragmentViewModel
 class AlbumDetailsContentFragment: BaseFragment() {
     private val albumDetailsViewModel: AlbumDetailsContentViewModel by fragmentViewModel()
     private lateinit var binding: FragmentAlbumDetailsBinding
+
+    private val tagTracks = "tag_tracks"
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,27 +35,35 @@ class AlbumDetailsContentFragment: BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        addTracksFragment()
+        val albumId = arguments?.getInt(keyAlbumId, -1) ?: -1
+        albumDetailsViewModel.getAlbumDetails(albumId)
+
         albumDetailsViewModel.albumDetails.observe(viewLifecycleOwner) { albumDetails ->
             val trackIds = albumDetails.trackList.map { it.trackId }
             val queueData = QueueData.buildAlbumData(albumDetails.id, trackIds)
 
-            addTracksFragment(albumDetails.trackList, queueData)
+            getTracksFragment()
+                ?.updateData(albumDetails.trackList, queueData)
+
             loadAlbumImage(albumDetails.id)
             binding.txtAlbumName.text = albumDetails.title
         }
-
-        val albumId = arguments?.getInt(keyAlbumId, -1) ?: -1
-        albumDetailsViewModel.getAlbumDetails(albumId)
     }
 
-    private fun addTracksFragment(tracks: List<Track>, queueData: QueueData) {
-        val tracksFragment = TracksFragment.newInstance(tracks, queueData)
+    private fun addTracksFragment() {
+        getTracksFragment() ?: run {
+            val tracksFragment = TracksFragment.newInstance()
 
-        childFragmentManager
-            .beginTransaction()
-            .add(R.id.fragment_tracks, tracksFragment)
-            .commit()
+            childFragmentManager
+                .beginTransaction()
+                .replace(R.id.fragment_tracks, tracksFragment, tagTracks)
+                .commit()
+        }
     }
+
+    private fun getTracksFragment(): TracksFragment? =
+        childFragmentManager.findFragmentByTag(tagTracks) as? TracksFragment
 
     private fun loadAlbumImage(albumId: Int) {
         val imgUri = Utils.getAlbumArtUri(albumId.toLong())

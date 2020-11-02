@@ -11,6 +11,7 @@ import com.jinjer.simpleplayer.presentation.databinding.FragmentPlayerContentBin
 
 abstract class PlayerFragmentWithContent: PlayerFragmentBase() {
     private lateinit var binding: FragmentPlayerContentBinding
+    private val tagContent = "tag_content"
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -25,7 +26,7 @@ abstract class PlayerFragmentWithContent: PlayerFragmentBase() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        addContentFragment()
+        addContent()
     }
 
     override fun getBehaviorView(): View = binding.fragmentPlayer
@@ -35,13 +36,30 @@ abstract class PlayerFragmentWithContent: PlayerFragmentBase() {
 
     override var idFragmentPlayer: Int = R.id.fragment_player
 
-    private fun addContentFragment() {
-        val fragment = getContentFragment()
+    fun showNewContent(fragment: Fragment, tag: String, addToBackStack: Boolean) {
+        addFragment(fragment, tag, addToBackStack)
+    }
 
-        childFragmentManager
+    private fun addContent() {
+        childFragmentManager.findFragmentByTag(tagContent) ?: run {
+            val fragment = getContentFragment()
+            addFragment(fragment, tagContent, false)
+        }
+    }
+
+    private fun addFragment(fragment: Fragment, tag: String, addToBackStack: Boolean) {
+        val transaction = childFragmentManager
             .beginTransaction()
-            .add(R.id.fragment_content, fragment)
-            .commit()
+            .add(R.id.fragment_content, fragment, tag)
+
+        if (addToBackStack) {
+            transaction
+                .addToBackStack(null)
+                .commit()
+        } else {
+            transaction
+                .commit()
+        }
     }
 
     abstract fun getContentFragment(): Fragment

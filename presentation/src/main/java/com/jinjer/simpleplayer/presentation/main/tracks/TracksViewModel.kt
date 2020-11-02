@@ -14,13 +14,8 @@ class TracksViewModel(
     private val mTracks = MutableLiveData<List<Track>>()
     val tracks: LiveData<List<Track>> = mTracks
 
-    fun onTracksLoaded(tracks: List<Track>?) {
+    fun showAllTracks() {
         viewModelScope.launch {
-            tracks?.let {
-                mTracks.value = it
-                return@launch
-            }
-
             getTracks()?.let {
                 mTracks.value = mapper.fromList(it)
             }

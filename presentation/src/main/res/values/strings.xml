@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">SimplePlayer</string>
 
-    <string name="tracks">tracks</string>
+    <string name="tracks">Tracks</string>
     <string name="folders">Folders</string>
     <string name="search">Search</string>
     <string name="singers">Singers</string>

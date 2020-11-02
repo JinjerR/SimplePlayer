@@ -10,9 +10,12 @@ import com.jinjer.simpleplayer.presentation.R
 import com.jinjer.simpleplayer.presentation.base.BaseFragment
 import com.jinjer.simpleplayer.presentation.controller.service.PlayerNavigator
 import com.jinjer.simpleplayer.presentation.controller.service.QueueData
+import com.jinjer.simpleplayer.presentation.controller.service.QueueType
 import com.jinjer.simpleplayer.presentation.databinding.FragmentTracksBinding
 import com.jinjer.simpleplayer.presentation.main.tracks.recycler_view.TracksAdapter
 import com.jinjer.simpleplayer.presentation.models.track.Track
+import com.jinjer.simpleplayer.presentation.utils.ShowLog
+import com.jinjer.simpleplayer.presentation.utils.ShowLog.tagTest
 import com.jinjer.simpleplayer.presentation.utils.extensions.fragmentViewModel
 
 class TracksFragment : BaseFragment() {
@@ -47,9 +50,17 @@ class TracksFragment : BaseFragment() {
         subscribeToMainViewModel()
     }
 
+    fun updateData(tracks: List<Track>, queueData: QueueData? = null) {
+        queueData?.let {
+            this.queueData = queueData
+        }
+
+        tracksAdapter.submitList(tracks)
+    }
+
     private fun subscribeToFragmentViewModel() {
         tracksViewModel.tracks.observe(viewLifecycleOwner) { tracks ->
-            tracksAdapter.submitList(tracks.toMutableList())
+            tracksAdapter.submitList(tracks)
         }
     }
 
@@ -59,8 +70,13 @@ class TracksFragment : BaseFragment() {
         }
         mainViewModel.isTracksLoaded.observe(viewLifecycleOwner) { isTracksLoaded ->
             if (isTracksLoaded) {
-                val tracks: List<Track>? = arguments?.getParcelableArrayList(keyTracks)
-                tracksViewModel.onTracksLoaded(tracks)
+                if (queueData?.type == QueueType.ALL_TRACKS) {
+                    tracksViewModel.showAllTracks()
+                } else {
+                    arguments?.getParcelableArrayList<Track>(keyTracks)?.let {
+                        tracksAdapter.submitList(it)
+                    }
+                }
             }
         }
         mainViewModel.currentTrack.observe(viewLifecycleOwner) { track ->
@@ -82,10 +98,10 @@ class TracksFragment : BaseFragment() {
     companion object {
         const val keyTracks = "key_tracks"
 
-        fun newInstance(tracks: List<Track>? = null, queueData: QueueData): TracksFragment = TracksFragment().apply {
+        fun newInstance(tracks: List<Track>? = null, queueData: QueueData? = null): TracksFragment = TracksFragment().apply {
             arguments = Bundle().apply {
                 tracks?.let { putParcelableArrayList(keyTracks, ArrayList(it)) }
-                putParcelable(PlayerNavigator.keyQueueData, queueData)
+                queueData?.let { putParcelable(PlayerNavigator.keyQueueData, queueData) }
             }
         }
     }

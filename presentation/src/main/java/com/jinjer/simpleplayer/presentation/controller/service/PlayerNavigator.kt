@@ -28,6 +28,9 @@ data class QueueData(
         fun buildAlbumData(albumId: Int, trackIds: List<Int>): QueueData {
             return QueueData(albumId, trackIds, ALBUM)
         }
+        fun buildSingerData(singerId: Int, trackIds: List<Int>): QueueData {
+            return QueueData(singerId, trackIds, SINGER)
+        }
         fun buildSearchData(): QueueData {
             return QueueData(-1, emptyList(), SEARCH)
         }

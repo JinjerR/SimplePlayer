@@ -21,7 +21,7 @@ class SearchSingersFragment: SearchFragmentBase<Singer, SearchSingerViewHolder>(
         return RecyclerItemDecoration(verticalSpace.toInt())
     }
 
-    private fun onItemClick(data: Singer) {
-
+    private fun onItemClick(singer: Singer) {
+        mainController?.showSingerDetails(singer.singerId)
     }
 }

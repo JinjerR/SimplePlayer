@@ -1,6 +1,5 @@
 package com.jinjer.simpleplayer.presentation.main.player
 
-import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -21,18 +20,13 @@ import com.jinjer.simpleplayer.presentation.utils.extensions.toSeconds
 
 class NowPlayingFragment: NowPlayingFragmentBase(), SeekBar.OnSeekBarChangeListener {
 
+    private val tagPlayerCollapsed = "tag_player_collapsed"
+
     private lateinit var binding: FragmentPlayerBinding
 
     private var trackingTouch: Boolean = false
     private var collapsedPlayerAlpha = 0f
     private var bottomSheetParent: IBottomSheetParent? = null
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-
-        bottomSheetParent = parentFragment as? IBottomSheetParent
-        bottomSheetParent?.addBottomSheetCallback(bottomSheetCallback)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,6 +42,9 @@ class NowPlayingFragment: NowPlayingFragmentBase(), SeekBar.OnSeekBarChangeListe
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        bottomSheetParent = parentFragment as? IBottomSheetParent
+        bottomSheetParent?.addBottomSheetCallback(bottomSheetCallback)
 
         addPlayerCollapsed()
 
@@ -144,12 +141,14 @@ class NowPlayingFragment: NowPlayingFragmentBase(), SeekBar.OnSeekBarChangeListe
     }
 
     private fun addPlayerCollapsed() {
-        val fragment = CollapsedPlayerFragment()
+        childFragmentManager.findFragmentByTag(tagPlayerCollapsed) ?: run {
+            val fragment = CollapsedPlayerFragment()
 
-        childFragmentManager
-            .beginTransaction()
-            .add(R.id.fragment_player_collapsed, fragment, null)
-            .commit()
+            childFragmentManager
+                .beginTransaction()
+                .replace(R.id.fragment_player_collapsed, fragment, tagPlayerCollapsed)
+                .commit()
+        }
     }
 
     private fun onCollapsedPlayerClicked(@Suppress("UNUSED_PARAMETER") view: View) {

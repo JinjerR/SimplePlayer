@@ -42,8 +42,8 @@
             android:layout_marginTop="@dimen/space"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginStart="@dimen/space"
-            android:layout_marginEnd="@dimen/space"
+            android:layout_marginStart="@dimen/space_half"
+            android:layout_marginEnd="@dimen/space_half"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             android:orientation="horizontal"/>
 
