@@ -21,6 +21,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 
 // TODO: very long vector path (lint check)
+// TODO: versions gradle file
 
 class MainActivity: BaseActivity(), IMainController {
 
