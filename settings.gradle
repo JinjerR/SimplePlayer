@@ -1,0 +1,6 @@
+rootProject.name = "Simpleplayer"
+include ':app'
+include ':musicplayer'
+include ':musicplayer:musicplayer-presentation'
+include ':musicplayer:musicplayer-data'
+include ':musicplayer:musicplayer-domain'
